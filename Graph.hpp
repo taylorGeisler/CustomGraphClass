@@ -27,7 +27,7 @@ class Graph {
   // later in the Graph's definition.
   // (As with all the "YOUR CODE HERE" markings, you may not actually NEED
   // code here. Just use the space if you need it.)
-
+  //
  public:
 
   //
