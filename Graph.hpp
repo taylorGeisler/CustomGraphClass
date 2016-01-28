@@ -384,8 +384,8 @@ class Graph {
   //   helper functions, data members, and so forth.
   
   std::vector<Point> g_nodes;
-  std::vector<edge_type> g_edges;
   std::vector<node_value_type> g_values;
+  std::vector<std::vector<size_type>> g_edges;
 
 };
 
