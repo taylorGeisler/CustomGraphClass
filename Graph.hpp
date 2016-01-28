@@ -23,11 +23,9 @@ template <typename V>
 class Graph {
  private:
 
-  // HW0: YOUR CODE HERE
   // Use this space for declarations of important internal types you need
   // later in the Graph's definition.
-  // (As with all the "YOUR CODE HERE" markings, you may not actually NEED
-  // code here. Just use the space if you need it.)
+
 
  public:
 
@@ -62,7 +60,6 @@ class Graph {
 
   /** Construct an empty graph. */
   Graph()
-    // HW0: YOUR CODE HERE
    : g_nodes(), g_edges(), g_values() {
   }
 
@@ -109,18 +106,15 @@ class Graph {
      * Invalid node index not initialized to value
      */
     Node() {
-      // HW0: YOUR CODE HERE
     }
 
     /** Return this node's position. */
     const Point& position() const {
-      // HW0: YOUR CODE HERE
       return n_graph->g_nodes[n_index];
     }
 
     /** Return this node's index, a number in the range [0, graph_size). */
     size_type index() const {
-      // HW0: YOUR CODE HERE
       return n_index;
     }
 
@@ -129,7 +123,6 @@ class Graph {
      * Equal nodes have the same graph and the same index.
      */
     bool operator==(const Node& n) const {
-      // HW0: YOUR CODE HERE
       if (n_index == n.n_index && n_graph == n.n_graph){
 		  return true;
       }
@@ -147,7 +140,6 @@ class Graph {
      * then by index if nodes of same graph
      */
     bool operator<(const Node& n) const {
-      // HW0: YOUR CODE HERE
       if ((n_graph <n.n_graph) or (n_graph == n.n_graph and n_index < n.n_index)){
 		  return true;
 	  }
@@ -182,14 +174,32 @@ class Graph {
    * 
    */
    
-   class node_iterator
+   class node_iterator {
+	   public:
+	     
+	     Node operator*() const {
+			 return ni_node;
+		 }
+		 
+		 node_iterator& operator++() {
+			 ++ni_node.n_index();
+		 }
+		 
+		 bool operator==(const node_iterator&) const {
+			 return ni_node == node_iterator.ni_node;
+		 }
+	   
+	   private:
+	     friend class Graph;
+	     node_type ni_node;
+	   
+   };
 
   /** Return the number of nodes in the graph.
    *
    * Complexity: O(1).
    */
   size_type size() const {
-    // HW0: YOUR CODE HERE
     return g_nodes.size();
   }
 
@@ -206,7 +216,6 @@ class Graph {
    * Complexity: O(1) amortized operations.
    */
   Node add_node(const Point& position, const node_value_type& = node_value_type()) {
-    // HW0: YOUR CODE HERE
     g_nodes.push_back(position);
     g_values.push_back(node_value_type());
     return Node(this, g_nodes.size()-1);
@@ -218,7 +227,6 @@ class Graph {
    * Complexity: O(1).
    */
   bool has_node(const Node& n) const {
-    // HW0: YOUR CODE HERE
     if (n.n_graph == this){
 		return true;
 	}
@@ -232,9 +240,26 @@ class Graph {
    * Complexity: O(1).
    */
   Node node(size_type i) const {
-    // HW0: YOUR CODE HERE
     return Node(this, i);
   }
+  
+  /** Return node iterator to first element in sequence
+   * 
+   * 
+   * 
+   */
+  node_iterator node_begin() const {
+	  return g_node_begin;
+  }
+   
+  /** Return node iterator to one past last element in sequence
+   * 
+   * 
+   * 
+   */
+   node_iterator node_end() const {
+	   return g_node_end;
+   }
 
   //
   // EDGES
@@ -250,18 +275,15 @@ class Graph {
    public:
     /** Construct an invalid Edge. */
     Edge() {
-      // HW0: YOUR CODE HERE
     }
 
     /** Return a node of this Edge */
     Node node1() const {
-      // HW0: YOUR CODE HERE
       return Node(e_graph,e_node1);
     }
 
     /** Return the other node of this Edge */
     Node node2() const {
-      // HW0: YOUR CODE HERE
       return Node(e_graph,e_node2);
     }
 
@@ -292,7 +314,7 @@ class Graph {
    private:
     // Allow Graph to access Edge's private member data and functions.
     friend class Graph;
-    // HW0: YOUR CODE HERE
+
     // Use this space to declare private data members and methods for Edge
     // that will not be visible to users, but may be useful within Graph.
     // i.e. Graph needs a way to construct valid Edge objects
@@ -310,6 +332,36 @@ class Graph {
 		e_node2 = edge_node2;
 	}
 	
+  };
+  
+  /** Defenition of edge iterator class
+   * 
+   * 
+   * 
+   */
+    
+  class edge_iterator {
+	  public:
+	    Edge operator*() const {
+			return Edge(ei_graph, node1_index, g_edges[node1_index][node2_pos]);
+		}
+		
+		edge_iterator& operator++() {
+			if (node2_pos
+		}
+		
+		bool operator==(const edge_iterator& eit) const {
+			
+		}
+	    
+	  
+	  private:
+	    friend class Graph;
+	    size_type node1_index;
+	    size_type node2_pos;
+	    graph_type* ei_graph;
+	    
+	  
   };
 
   /** Return the total number of edges in the graph.
@@ -363,7 +415,6 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   Edge add_edge(const Node& a, const Node& b) {
-    // HW0: YOUR CODE HERE
     edge_type new_edge = Edge(this, a.index(), b.index());
     if (!has_edge(a, b)) {
 	    g_edges[a.index()].push_back(b.index());
@@ -371,6 +422,24 @@ class Graph {
 	}
     return new_edge;
   }
+  
+  /** Return edge iterator of first edge in sequence
+   * 
+   * 
+   * 
+   */
+  edge_iterator edge_begin() const {
+	  return g_edge_begin;
+  }
+  
+  /** Return edge iterator of on past last edge in sequence
+   * 
+   * 
+   * 
+   */
+   edge_iterator edge_end() const {
+	   return g_edge_end;
+   }
 
   /** Remove all nodes and edges from this graph.
    * @post num_nodes() == 0 && num_edges() == 0
@@ -378,21 +447,20 @@ class Graph {
    * Invalidates all outstanding Node and Edge objects.
    */
   void clear() {
-    // HW0: YOUR CODE HERE
     g_nodes.clear();
     g_edges.clear();
     g_values.clear();
   }
 
  private:
-
-  // HW0: YOUR CODE HERE
-  // Use this space for your Graph class's internals:
-  //   helper functions, data members, and so forth.
-  
+ 
   std::vector<Point> g_nodes;
   std::vector<node_value_type> g_values;
   std::vector<std::vector<size_type>> g_edges;
+  node_iterator g_node_begin;
+  node_iterator g_node_end;
+  edge_iterator g_edge_begin;
+  edge_iterator g_edge_end;
 
 };
 
