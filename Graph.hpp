@@ -176,6 +176,13 @@ class Graph {
 	}
     
   };
+  
+  /** Define node iterator class
+   * 
+   * 
+   */
+   
+   class node_iterator
 
   /** Return the number of nodes in the graph.
    *
@@ -310,8 +317,11 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   size_type num_edges() const {
-    // HW0: YOUR CODE HERE
-    return g_edges.size();
+	  size_type edge_count = 0;
+      for (auto ei = g.edge_begin(); ei != g.edge_end(); ++ei) {
+		  edge_count += 1;
+	  }
+    return edge_count;
   }
 
   /** Return the edge with index @a i.
@@ -320,8 +330,11 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   Edge edge(size_type i) const {
-    // HW0: YOUR CODE HERE
-    return g_edges[i];
+	  auto ei = g.edge_begin();
+      for (int j = 0; j < i; j++) {
+		  ++ei;
+	  }
+	  return *ei;
   }
 
   /** Test whether two nodes are connected by an edge.
@@ -331,15 +344,8 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   bool has_edge(const Node& a, const Node& b) const {
-    // HW0: YOUR CODE HERE
-    size_type i = 0;
-    size_type total_edges = num_edges();
-    edge_type test_edge = Edge(this, a.index(), b.index());
-    while (i < total_edges) {
-		if (test_edge == g_edges[i]) {
-			return true;
-		} 
-		i++;
+    if (std::find(g_edges[a].begin(), g_edges[a].end(), b.index()) != g_edges[a].end()) {
+		return true;
 	}
     return false;
   }
@@ -360,7 +366,8 @@ class Graph {
     // HW0: YOUR CODE HERE
     edge_type new_edge = Edge(this, a.index(), b.index());
     if (!has_edge(a, b)) {
-	    g_edges.push_back(new_edge);
+	    g_edges[a.index()].push_back(b.index());
+	    g_edges[b.index()].push_back(a.index());
 	}
     return new_edge;
   }
