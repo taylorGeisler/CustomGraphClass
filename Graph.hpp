@@ -19,6 +19,7 @@
  * Users can add and retrieve nodes and edges. Edges are unique (there is at
  * most one edge between any pair of distinct nodes).
  */
+template <typename V>
 class Graph {
  private:
 
@@ -36,6 +37,9 @@ class Graph {
 
   /** Type of this graph. */
   typedef Graph graph_type;
+  
+  /** Type of user-specified value. */
+  typedef V node_value_type;
 
   /** Predeclaration of Node type. */
   class Node;
@@ -59,7 +63,7 @@ class Graph {
   /** Construct an empty graph. */
   Graph()
     // HW0: YOUR CODE HERE
-   : g_nodes(), g_edges() {
+   : g_nodes(), g_edges(), g_values() {
   }
 
   /** Default destructor */
@@ -74,8 +78,18 @@ class Graph {
    *
    * Node objects are used to access information about the Graph's nodes.
    */
-  class Node {
+  class Node : private totally_ordered<Node>{
    public:
+   
+    /** Define node value type. */
+    node_value_type& value() {
+        return n_graph->g_values[n_index];
+    }
+
+    const node_value_type& value() const {
+        return n_graph->g_values[n_index];
+    }
+
     /** Construct an invalid node.
      *
      * Valid nodes are obtained from the Graph class, but it
@@ -148,7 +162,7 @@ class Graph {
     // that will not be visible to users, but may be useful within Graph.
     // i.e. Graph needs a way to construct valid Node objects
 	
-	const graph_type* n_graph = nullptr;
+    const graph_type* n_graph = nullptr;
     size_type n_index;
     
     /** Construct a valid Node object
@@ -158,7 +172,7 @@ class Graph {
      */
     Node(const graph_type* node_graph, size_type node_index) {
 		n_index = node_index;
-		n_graph = node_graph;		
+		n_graph = node_graph;
 	}
     
   };
@@ -184,9 +198,10 @@ class Graph {
    *
    * Complexity: O(1) amortized operations.
    */
-  Node add_node(const Point& position) {
+  Node add_node(const Point& position, const node_value_type& = node_value_type()) {
     // HW0: YOUR CODE HERE
     g_nodes.push_back(position);
+    g_values.push_back(node_value_type());
     return Node(this, g_nodes.size()-1);
   }
 
@@ -224,7 +239,7 @@ class Graph {
    * Edges are order-insensitive pairs of nodes. Two Edges with the same nodes
    * are considered equal if they connect the same nodes, in either order.
    */
-  class Edge {
+  class Edge : private totally_ordered<Edge> {
    public:
     /** Construct an invalid Edge. */
     Edge() {
@@ -359,6 +374,7 @@ class Graph {
     // HW0: YOUR CODE HERE
     g_nodes.clear();
     g_edges.clear();
+    g_values.clear();
   }
 
  private:
@@ -369,6 +385,7 @@ class Graph {
   
   std::vector<Point> g_nodes;
   std::vector<edge_type> g_edges;
+  std::vector<node_value_type> g_values;
 
 };
 

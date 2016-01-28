@@ -30,8 +30,9 @@ int main(int argc, char** argv)
   }
 
   // Construct a Graph
-  Graph graph;
-  std::vector<typename Graph::node_type> nodes;
+  typedef Graph<int> GraphType;
+  GraphType graph;
+  std::vector<typename GraphType::node_type> nodes;
 
   // Create a nodes_file from the first input argument
   std::ifstream nodes_file(argv[1]);
@@ -57,8 +58,8 @@ int main(int argc, char** argv)
   viewer.launch();
 
   // Set the viewer
-  viewer.draw_graph_nodes(graph);
-  //viewer.draw_graph(graph);
+  //viewer.draw_graph_nodes(graph);
+  viewer.draw_graph(graph);
   viewer.center_view();
 
   return 0;
