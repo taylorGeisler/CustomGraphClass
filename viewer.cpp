@@ -30,7 +30,8 @@ int main(int argc, char** argv)
   }
 
   // Construct a Graph
-  Graph<int> graph;
+  typedef Graph<int> GraphType;
+  GraphType graph;
   std::vector<typename Graph::node_type> nodes;
 
   // Create a nodes_file from the first input argument
@@ -55,7 +56,9 @@ int main(int argc, char** argv)
   // Launch a viewer
   CME212::SDLViewer viewer;
   viewer.launch();
-
+  
+  auto node_map = viewer.empty_node_map(graph);
+  viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
   // Set the viewer
   viewer.draw_graph_nodes(graph);
   //viewer.draw_graph(graph);
