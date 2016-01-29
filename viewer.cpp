@@ -29,59 +29,37 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-
   // Construct a Graph
-  typedef Graph<int> GraphType;
-  GraphType graph;
-  
-  CME212::SDLViewer viewer;
-  viewer.launch();
-  
-  auto node_map = viewer.empty_node_map(graph);
-  viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
-  //graph.add_node(Point(0,0,0));
-  //graph.add_node(Point(1,1,1));
-  std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
-  viewer.draw_graph_nodes(graph);
-  viewer.center_view();
-  
-
-  
-  //std::vector<typename GraphType::node_type> nodes;
+  Graph<int> graph;
+  std::vector<typename Graph::node_type> nodes;
 
   // Create a nodes_file from the first input argument
-  //std::ifstream nodes_file(argv[1]);
+  std::ifstream nodes_file(argv[1]);
   // Interpret each line of the nodes_file as a 3D Point and add to the Graph
-  //Point p;
-  //while (CME212::getline_parsed(nodes_file, p))
-  //  nodes.push_back(graph.add_node(p));
-
-
+  Point p;
+  while (CME212::getline_parsed(nodes_file, p))
+    nodes.push_back(graph.add_node(p));
 
   // Create a tets_file from the second input argument
-  //std::ifstream tets_file(argv[2]);
+  std::ifstream tets_file(argv[2]);
   // Interpret each line of the tets_file as four ints which refer to nodes
-  //std::array<int,4> t;
-  //while (CME212::getline_parsed(tets_file, t))
-  // for (unsigned i = 1; i < t.size(); ++i)
-  //    for (unsigned j = 0; j < i; ++j)
-  //      graph.add_edge(nodes[t[i]], nodes[t[j]]);
+  std::array<int,4> t;
+  while (CME212::getline_parsed(tets_file, t))
+    for (unsigned i = 1; i < t.size(); ++i)
+      for (unsigned j = 0; j < i; ++j)
+        graph.add_edge(nodes[t[i]], nodes[t[j]]);
 
   // Print number of nodes and edges
-  //std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
+  std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
 
   // Launch a viewer
-  
+  CME212::SDLViewer viewer;
+  viewer.launch();
 
   // Set the viewer
-  //viewer.draw_graph_nodes(graph);
+  viewer.draw_graph_nodes(graph);
   //viewer.draw_graph(graph);
-  
-  //std::cout << graph.node(0).value() << std::endl;
-  //std::cout << graph.node(0).index() << std::endl;
-  //  std::cout<< "I'm working" <<std::endl;
-  //viewer.center_view();
-  //  std::cout<< "I'm working" <<std::endl;
+  viewer.center_view();
 
   return 0;
 }
