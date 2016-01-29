@@ -26,7 +26,6 @@ class Graph {
   // Use this space for declarations of important internal types you need
   // later in the Graph's definition.
 
-
  public:
 
   //
@@ -60,7 +59,12 @@ class Graph {
 
   /** Construct an empty graph. */
   Graph()
-   : g_nodes(), g_edges(), g_values() {
+   : g_nodes(), g_values(), g_edges() {
+	   g_node_begin = node_iterator(Node(this,0));
+	   g_node_end = node_iterator(Node(this,0));
+	   
+	   g_edge_begin = edge_iterator(this,0,0);
+	   g_edge_end = edge_iterator(this,0,0);  
   }
 
   /** Default destructor */
@@ -174,24 +178,35 @@ class Graph {
    * 
    */
    
-   class node_iterator {
+   class node_iterator : private totally_ordered<node_iterator> {
 	   public:
 	     
+	     node_iterator() {
+		 }
+		 
+	     /** Return node that iterator is representing */
 	     Node operator*() const {
 			 return ni_node;
 		 }
 		 
+		 /** Increment node iterator to next node in graph */
 		 node_iterator& operator++() {
-			 ++ni_node.n_index();
+			 ++ni_node.n_index;
+			 return *this;
 		 }
 		 
-		 bool operator==(const node_iterator&) const {
-			 return ni_node == node_iterator.ni_node;
+		 /** Compare equality of two node iterators */
+		 bool operator==(const node_iterator& nit) const {
+			 return ni_node == nit.ni_node;
 		 }
 	   
 	   private:
 	     friend class Graph;
 	     node_type ni_node;
+	     
+	     node_iterator(node_type no) {
+			 ni_node = no;
+		 }
 	   
    };
 
@@ -215,9 +230,11 @@ class Graph {
    *
    * Complexity: O(1) amortized operations.
    */
-  Node add_node(const Point& position, const node_value_type& = node_value_type()) {
+  Node add_node(const Point& position, const node_value_type& n = node_value_type()) {
     g_nodes.push_back(position);
-    g_values.push_back(node_value_type());
+    g_values.push_back(n);
+    ++g_node_end;
+    std::cout<<g_nodes[1] <<std::endl;
     return Node(this, g_nodes.size()-1);
   }
 
@@ -340,18 +357,37 @@ class Graph {
    * 
    */
     
-  class edge_iterator {
+  class edge_iterator : private totally_ordered<edge_iterator> {
 	  public:
+	  
+	    edge_iterator() {
+		}
+		
+	    /** Return edge referenced by this edge iterator */
 	    Edge operator*() const {
-			return Edge(ei_graph, node1_index, g_edges[node1_index][node2_pos]);
+			return Edge(ei_graph, node1_index, ei_graph->index_node2(*this));
 		}
 		
+		/** Increment edge iterator to next edge in sequence */
 		edge_iterator& operator++() {
-			if (node2_pos
+			while(ei_graph->index_node2(*this) < node1_index) {
+			    if (node2_pos == ei_graph->connectivity((*this).node1_index) - 1 ) {
+				    node1_index += 1;
+				    node2_pos = 0;
+			    }
+			    else {
+				    node2_pos += 1;
+			    }
+		    }
+		    return *this;
 		}
 		
+		/** Compare equality of two edge iterators */
 		bool operator==(const edge_iterator& eit) const {
-			
+			if (node1_index == eit.node1_index and node2_pos == eit.node2_pos and ei_graph == eit.ei_graph) {
+				return true;
+			}
+			return false;
 		}
 	    
 	  
@@ -359,9 +395,13 @@ class Graph {
 	    friend class Graph;
 	    size_type node1_index;
 	    size_type node2_pos;
-	    graph_type* ei_graph;
+	    const graph_type* ei_graph;
 	    
-	  
+	    edge_iterator(const graph_type* edge_graph, size_type n1_i, size_type n2_pos) {
+			ei_graph = edge_graph;
+			node1_index = n1_i;
+			node2_pos = n2_pos;
+		}
   };
 
   /** Return the total number of edges in the graph.
@@ -370,7 +410,7 @@ class Graph {
    */
   size_type num_edges() const {
 	  size_type edge_count = 0;
-      for (auto ei = g.edge_begin(); ei != g.edge_end(); ++ei) {
+      for (auto ei = edge_begin(); ei != edge_end(); ++ei) {
 		  edge_count += 1;
 	  }
     return edge_count;
@@ -382,8 +422,8 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   Edge edge(size_type i) const {
-	  auto ei = g.edge_begin();
-      for (int j = 0; j < i; j++) {
+	  auto ei = edge_begin();
+      for (size_type j = 0; j < i; j++) {
 		  ++ei;
 	  }
 	  return *ei;
@@ -396,7 +436,7 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   bool has_edge(const Node& a, const Node& b) const {
-    if (std::find(g_edges[a].begin(), g_edges[a].end(), b.index()) != g_edges[a].end()) {
+    if (std::find(g_edges[a.index()].begin(), g_edges[a.index()].end(), b.index()) != g_edges[a.index()].end()) {
 		return true;
 	}
     return false;
@@ -440,6 +480,16 @@ class Graph {
    edge_iterator edge_end() const {
 	   return g_edge_end;
    }
+   
+   /** Return index of the second node refered to by edge iterator */
+   size_type index_node2(const edge_iterator& eit) const {
+	   return g_edges[eit.node1_index][eit.node2_pos];
+   }
+   
+   /** Return number of edges connected to current node */
+   size_type connectivity(const size_type& no_index) const {
+	   return g_edges[no_index].size();
+   }
 
   /** Remove all nodes and edges from this graph.
    * @post num_nodes() == 0 && num_edges() == 0
@@ -453,7 +503,6 @@ class Graph {
   }
 
  private:
- 
   std::vector<Point> g_nodes;
   std::vector<node_value_type> g_values;
   std::vector<std::vector<size_type>> g_edges;
