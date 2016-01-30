@@ -19,14 +19,12 @@
  * Users can add and retrieve nodes and edges. Edges are unique (there is at
  * most one edge between any pair of distinct nodes).
  */
+ template <typename V>
 class Graph {
  private:
 
-  // HW0: YOUR CODE HERE
   // Use this space for declarations of important internal types you need
   // later in the Graph's definition.
-  // (As with all the "YOUR CODE HERE" markings, you may not actually NEED
-  // code here. Just use the space if you need it.)
 
  public:
 
@@ -41,6 +39,9 @@ class Graph {
   class Node;
   /** Synonym for Node (following STL conventions). */
   typedef Node node_type;
+  
+  /** Type of values stored in node */
+  typedef V node_value_type;
 
   /** Predeclaration of Edge type. */
   class Edge;
@@ -89,7 +90,7 @@ class Graph {
    *
    * Node objects are used to access information about the Graph's nodes.
    */
-  class Node {
+  class Node : private totally_ordered<Node> {
    public:
     /** Construct an invalid node.
      *
@@ -154,6 +155,14 @@ class Graph {
 	  }
 	  return false;
     }
+    
+    node_value_type& value() {
+		return n_graph->g_values[n_index];
+	}
+	
+	const node_value_type& value() const {
+		return n_graph->g_values[n_index];
+	}
 
    private:
     // Allow Graph to access Node's private member data and functions.
@@ -199,9 +208,10 @@ class Graph {
    *
    * Complexity: O(1) amortized operations.
    */
-  Node add_node(const Point& position) {
+  Node add_node(const Point& position, const node_value_type& v = node_value_type()) {
     // HW0: YOUR CODE HERE
     g_nodes.push_back(position);
+    g_values.push_back(v);
     return Node(this, g_nodes.size()-1);
   }
 
@@ -239,7 +249,7 @@ class Graph {
    * Edges are order-insensitive pairs of nodes. Two Edges with the same nodes
    * are considered equal if they connect the same nodes, in either order.
    */
-  class Edge {
+  class Edge : private totally_ordered<Edge> {
    public:
     /** Construct an invalid Edge. */
     Edge() {
@@ -382,7 +392,7 @@ class Graph {
 
   /** @class Graph::NodeIterator
    * @brief Iterator class for nodes. A forward iterator. */
-  class NodeIterator {
+  class NodeIterator : private totally_ordered<NodeIterator> {
    public:
     // These type definitions help us use STL's iterator_traits.
     /** Element type. */
@@ -422,7 +432,7 @@ class Graph {
 
   /** @class Graph::EdgeIterator
    * @brief Iterator class for edges. A forward iterator. */
-  class EdgeIterator {
+  class EdgeIterator : private totally_ordered<EdgeIterator> {
    public:
     // These type definitions help us use STL's iterator_traits.
     /** Element type. */
@@ -499,6 +509,7 @@ class Graph {
   
   std::vector<Point> g_nodes;
   std::vector<edge_type> g_edges;
+  std::vector<node_value_type> g_values;
 
 };
 

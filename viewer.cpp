@@ -57,12 +57,12 @@ int main(int argc, char** argv)
   CME212::SDLViewer viewer;
   viewer.launch();
   
-  auto node_map = viewer.empty_node_map(graph);
-  viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
+  //auto node_map = viewer.empty_node_map(graph);
+  //viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
   // Set the viewer
   //viewer.draw_graph_nodes(graph);
-  //viewer.draw_graph(graph);
-  //viewer.center_view();
+  viewer.draw_graph(graph);
+  viewer.center_view();
 
   return 0;
 }
