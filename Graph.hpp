@@ -75,7 +75,7 @@ class Graph {
   /** Construct an empty graph. */
   Graph()
     // HW0: YOUR CODE HERE
-   : g_nodes(), g_edges() {
+   : g_nodes(), g_edges(), g_values() {
 	   g_num_nodes = 0;
 	   g_num_edges = 0;
   }
@@ -491,9 +491,43 @@ class Graph {
     // Edge operator*() const
     // EdgeIterator& operator++()
     // bool operator==(const EdgeIterator&) const
+    Edge operator*() const {
+	    return Edge(ei_graph, ei_node1_i, ei_graph->index_node2(*this));
+	}
+	
+	EdgeIterator& operator ++() {
+		while(ei_graph->index_node2(*this) < node1_index) {
+			if (ei_node2_pos == ei_graph->connectivity((*this).ei_node1_i) - 1) {
+				++ei_node1_i;
+				ei_node2_p = 0;
+			}
+			else {
+				++ei_node2_p;
+			}
+		}
+		return *this;
+	}
+	
+	bool operator==(const EdgeIterator& eit) {
+		if (ei_graph == eit_graph and ei_node1_i == eit.ei_node1_i and ei_node2_p == eit.ei_node2_p) {
+			return true;
+		}
+		return false;
+	}
 
    private:
     friend class Graph;
+    graph_type* ei_graph;
+    size_type ei_node1_i;
+    size_type ei_node2_p;
+    
+    EdgeIterator(const graph_type* current_graph, size_type node1_i, size_type node2_p) {
+		ei_graph = const_cast<graph_type*>(current_graph);
+		ei_node1_i = node1_i;
+		ei_node2_p = node2_p;
+	}
+	
+	
     // HW1 #3: YOUR CODE HERE
   };
 
@@ -501,6 +535,26 @@ class Graph {
   // Supply definitions AND SPECIFICATIONS for:
   // edge_iterator edge_begin() const
   // edge_iterator edge_end() const
+  
+  edge_iterator edge_begin() const {
+	  int i = 0;
+	  while (g_edges[i].size() == 0) {
+		  ++i;
+	  }
+	  return edge_iterator(this,i,0);
+  }
+  
+  edge_iterator edge_end() const {
+	  return edge_iterator(this,g_num_nodes,0);
+  }
+  
+  size_type index_node2(const edge_iterator& eit) const {
+	  return g_edges[eit.ei_node1_i][eit.ei_node2_p];
+  }
+  
+  size_type connectivity(const edge_iterator& eit) const {
+	  return g_edges[ei_node1_i].size();
+  }
 
   //
   // Incident Iterator
@@ -544,7 +598,7 @@ class Graph {
   //   helper functions, data members, and so forth.
   
   std::vector<Point> g_nodes;
-  std::vector<edge_type> g_edges;
+  std::vector<std::vector<size_type>> g_edges;
   std::vector<node_value_type> g_values;
   size_type g_num_nodes;
   size_type g_num_edges;
