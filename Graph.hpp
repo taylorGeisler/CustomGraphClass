@@ -76,6 +76,8 @@ class Graph {
   Graph()
     // HW0: YOUR CODE HERE
    : g_nodes(), g_edges() {
+	   g_num_nodes = 0;
+	   g_num_edges = 0;
   }
 
   /** Default destructor */
@@ -384,6 +386,7 @@ class Graph {
     // HW0: YOUR CODE HERE
     g_nodes.clear();
     g_edges.clear();
+    g_values.clear();
   }
 
   //
@@ -415,16 +418,47 @@ class Graph {
     // Node operator*() const
     // NodeIterator& operator++()
     // bool operator==(const NodeIterator&) const
+    
+    Node operator*() const {
+		return Node(ni_graph, ni_index);
+	}
+	
+	node_iterator& operator++() {
+		++ni_index;
+		return *this;
+	}
+	
+	bool operator==(const node_iterator& ni) const {
+		if (ni_index == ni.ni_index) {
+			return true;
+		}
+		return false;
+	}
 
    private:
     friend class Graph;
     // HW1 #2: YOUR CODE HERE
+    size_type ni_index;
+    graph_type* ni_graph;
+    
+    NodeIterator(const graph_type* graph, size_type index) {
+		ni_graph = graph;
+		ni_index = index;
+	}
   };
 
   // HW1 #2: YOUR CODE HERE
   // Supply definitions AND SPECIFICATIONS for:
   // node_iterator node_begin() const
   // node_iterator node_end() const
+  
+  node_iterator node_begin() const {
+	  return NodeIterator(this, 0);
+  }
+  
+  node_iterator node_end() const {
+	  return NodeIterator(this, g_num_nodes);
+  }
 
   //
   // Edge Iterator
@@ -510,6 +544,8 @@ class Graph {
   std::vector<Point> g_nodes;
   std::vector<edge_type> g_edges;
   std::vector<node_value_type> g_values;
+  size_type g_num_nodes;
+  size_type g_num_edges;
 
 };
 
