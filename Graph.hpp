@@ -214,6 +214,7 @@ class Graph {
     // HW0: YOUR CODE HERE
     g_nodes.push_back(position);
     g_values.push_back(v);
+    ++g_num_nodes;
     return Node(this, g_nodes.size()-1);
   }
 
@@ -429,7 +430,7 @@ class Graph {
 	}
 	
 	bool operator==(const node_iterator& ni) const {
-		if (ni_index == ni.ni_index) {
+		if (ni_index == ni.ni_index and ni_graph == ni.ni_graph) {
 			return true;
 		}
 		return false;
@@ -441,10 +442,11 @@ class Graph {
     size_type ni_index;
     graph_type* ni_graph;
     
-    NodeIterator(const graph_type* graph, size_type index) {
-		ni_graph = graph;
+    NodeIterator(const graph_type* current_graph, size_type index) {
+		ni_graph = const_cast<graph_type*>(current_graph);
 		ni_index = index;
 	}
+    
   };
 
   // HW1 #2: YOUR CODE HERE
