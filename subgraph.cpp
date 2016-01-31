@@ -40,6 +40,9 @@ class filter_iterator
   filter_iterator(const Pred& p, const It& first, const It& last)
       : p_(p), it_(first), end_(last) {
     // HW1 #4: YOUR CODE HERE
+    while (!(p_(*it_)) and it_ != end_) {
+		++it_;
+	}
   }
 
   // HW1 #4: YOUR CODE HERE
@@ -54,14 +57,14 @@ class filter_iterator
   
   self_type& operator++() {
 	      ++it_;
-	      //while (!(p_(*it_)) and it_ != end_) {
-		//	  ++it_;
-		  //}
+	      while (!(p_(*it_)) and it_ != end_) {
+			  ++it_;
+		  }
 	      return *this;
       }
   
   bool operator==(const self_type& fi) const {
-      return (it_ == fi.it_ and end_ != fi.end_);
+      return (it_ == fi.it_ and end_ == fi.end_);
   }
 
  private:
@@ -92,8 +95,8 @@ filter_iterator<Pred,Iter> make_filtered(const Iter& it, const Iter& end,
 struct SlicePredicate {
   template <typename NODE>
   bool operator()(const NODE& n) {
-    return n.position().x < 12;
-    //return true;
+    return n.position().x < 0.5;
+    //return false;
   }
 };
 
@@ -138,7 +141,6 @@ int main(int argc, char** argv)
   // Use the filter_iterator to plot an induced subgraph.
   auto node_map = viewer.empty_node_map(graph);
   SlicePredicate predicate;
-  //std::cout << predicate(graph.node(0)) << std::endl;
   auto it = make_filtered(graph.node_begin(), graph.node_end(), predicate);
   auto it_end = make_filtered(graph.node_end(), graph.node_end(), predicate);
   viewer.add_nodes(it, it_end, node_map);
