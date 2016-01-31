@@ -165,6 +165,18 @@
 	const node_value_type& value() const {
 		return n_graph->g_values[n_index];
 	}
+	
+	size_type degree() {
+		return connectivity(n_index);
+	}
+	
+	incident_iterator edge_begin() const {
+		return incident_iterator(n_graph,n_index,0);
+	}
+	
+	incident_iterator edge_end() const {
+		return incident_iterator(n_graph,n_index,degree());
+	}
 
    private:
     // Allow Graph to access Node's private member data and functions.
@@ -562,8 +574,16 @@
 	  return g_edges[eit.ei_node1_i][eit.ei_node2_p];
   }
   
+  size_type index_node2(const incident_iterator& iit) const {
+	  return g_edges[iit.iit_node][iit.iit_edge_p];
+  }
+  
   size_type connectivity(const edge_iterator& eit) const {
 	  return g_edges[eit.ei_node1_i].size();
+  }
+  
+  size_type connectivity(const size_type n) const {
+	  return g_edges[n].size();
   }
   
   size_type graph_size() {
@@ -599,10 +619,34 @@
     // Edge operator*() const
     // IncidentIterator& operator++()
     // bool operator==(const IncidentIterator&) const
+    Edge operator*() const {
+		return Edge(iit_graph,iit_node,iit_graph->index_node2(*this));
+	}
+	
+	incident_iterator& operator++() {
+		++iit_edge_p;
+		return *this;
+	}
+	
+	bool operator==(const incident_iterator& iit) const {
+		if (iit_node == iit.iit_node and iit_edge_p == iit.iit_edge_p and iit_graph == iit.iit_graph) {
+			return true;
+		}
+		return false;
+	}
 
    private:
     friend class Graph;
     // HW1 #5: YOUR CODE HERE
+    graph_type* iit_graph;
+    size_type iit_node;
+    size_type iit_edge_p;
+    
+    IncidentIterator(const graph_type* current_graph, const Node& n, size_type edge_p) {
+		iit_graph = const_cast<graph_type*>(current_graph);
+		iit_node = n.index();
+		iit_edge_p = edge_p;
+	}
   };
 
  private:
