@@ -317,7 +317,6 @@
 		e_node1 = edge_node1;
 		e_node2 = edge_node2;
 	}
-	
   };
 
   /** Return the total number of edges in the graph.
@@ -326,6 +325,11 @@
    */
   size_type num_edges() const {
     return g_num_edges;
+      //size_type counter = 0;
+      //for (auto ei = edge_begin(); ei != edge_end(); ++ei) {
+		  //++counter;
+	  //}
+	  //return counter;
   }
 
   /** Return the edge with index @a i.
@@ -500,7 +504,7 @@
 	EdgeIterator& operator ++() {
 		do {
 		    ++ei_node2_p;
-		    if (ei_node2_p > ei_graph->connectivity(*this)) {
+		    if (ei_node2_p == ei_graph->connectivity(*this)) {
 			    ei_node2_p = 0;
 			    do {
 				    ++ei_node1_i;

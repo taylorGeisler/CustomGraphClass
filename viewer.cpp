@@ -62,15 +62,15 @@ int main(int argc, char** argv)
   CME212::SDLViewer viewer;
   viewer.launch();
   
-  //auto node_map = viewer.empty_node_map(graph);
-  //viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
-  //viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
+  auto node_map = viewer.empty_node_map(graph);
+  viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
+  viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
   // Set the viewer
   //viewer.draw_graph_nodes(graph);
   //auto node_map = viewer.empty_node_map(graph);
   //viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
-  //std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
-  viewer.draw_graph(graph);
+ //std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
+  //viewer.draw_graph(graph);
   viewer.center_view();
   
   //graph.add_node(Point(1,1,1),1);
