@@ -47,6 +47,22 @@ class filter_iterator
   // value_type operator*() const;
   // self_type& operator++();
   // bool operator==(const self_type&) const;
+  
+  value_type operator*() const {
+	  return *it_;
+  }
+  
+  self_type& operator++() {
+	      ++it_;
+	      //while (!(p_(*it_)) and it_ != end_) {
+		//	  ++it_;
+		  //}
+	      return *this;
+      }
+  
+  bool operator==(const self_type& fi) const {
+      return (it_ == fi.it_ and end_ != fi.end_);
+  }
 
  private:
   Pred p_;
@@ -76,7 +92,8 @@ filter_iterator<Pred,Iter> make_filtered(const Iter& it, const Iter& end,
 struct SlicePredicate {
   template <typename NODE>
   bool operator()(const NODE& n) {
-    return n.position().x < 0;
+    return n.position().x < 12;
+    //return true;
   }
 };
 
@@ -119,6 +136,14 @@ int main(int argc, char** argv)
 
   // HW1 #4: YOUR CODE HERE
   // Use the filter_iterator to plot an induced subgraph.
+  auto node_map = viewer.empty_node_map(graph);
+  SlicePredicate predicate;
+  //std::cout << predicate(graph.node(0)) << std::endl;
+  auto it = make_filtered(graph.node_begin(), graph.node_end(), predicate);
+  auto it_end = make_filtered(graph.node_end(), graph.node_end(), predicate);
+  viewer.add_nodes(it, it_end, node_map);
+  viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
+  viewer.center_view();
 
   return 0;
 }
