@@ -20,7 +20,7 @@
  * most one edge between any pair of distinct nodes).
  */
  template <typename V>
-class Graph {
+ class Graph {
  private:
 
   // Use this space for declarations of important internal types you need
@@ -215,6 +215,8 @@ class Graph {
     g_nodes.push_back(position);
     g_values.push_back(v);
     ++g_num_nodes;
+    std::vector<size_type> empty_vector;
+    g_edges.push_back(empty_vector);
     return Node(this, g_nodes.size()-1);
   }
 
@@ -323,8 +325,7 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   size_type num_edges() const {
-    // HW0: YOUR CODE HERE
-    return g_edges.size();
+    return g_num_edges;
   }
 
   /** Return the edge with index @a i.
@@ -333,8 +334,11 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   Edge edge(size_type i) const {
-    // HW0: YOUR CODE HERE
-    return g_edges[i];
+    auto ei = edge_begin();
+    for (size_type j = 0; j < i; ++j) {
+		++ei;
+	}
+    return *ei;
   }
 
   /** Test whether two nodes are connected by an edge.
@@ -344,17 +348,14 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   bool has_edge(const Node& a, const Node& b) const {
-    // HW0: YOUR CODE HERE
-    size_type i = 0;
-    size_type total_edges = num_edges();
-    edge_type test_edge = Edge(this, a.index(), b.index());
-    while (i < total_edges) {
-		if (test_edge == g_edges[i]) {
-			return true;
-		} 
-		i++;
-	}
-    return false;
+	  if (g_edges[a.index()].size() != 0) { 
+	      for (size_type i = 0; i < g_edges[a.index()].size(); ++i) {
+		      if (g_edges[a.index()][i] == b.index()) {
+		          return true;
+		      }
+	      }
+      }
+      return false;
   }
 
   /** Add an edge to the graph, or return the current edge if it already exists.
@@ -370,10 +371,11 @@ class Graph {
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   Edge add_edge(const Node& a, const Node& b) {
-    // HW0: YOUR CODE HERE
     edge_type new_edge = Edge(this, a.index(), b.index());
     if (!has_edge(a, b)) {
-	    g_edges.push_back(new_edge);
+	    g_edges[a.index()].push_back(b.index());
+	    g_edges[b.index()].push_back(a.index());
+	    ++g_num_edges;
 	}
     return new_edge;
   }
@@ -496,20 +498,23 @@ class Graph {
 	}
 	
 	EdgeIterator& operator ++() {
-		while(ei_graph->index_node2(*this) < node1_index) {
-			if (ei_node2_pos == ei_graph->connectivity((*this).ei_node1_i) - 1) {
-				++ei_node1_i;
-				ei_node2_p = 0;
-			}
-			else {
-				++ei_node2_p;
-			}
-		}
+		do {
+		    ++ei_node2_p;
+		    if (ei_node2_p > ei_graph->connectivity(*this)) {
+			    ei_node2_p = 0;
+			    do {
+				    ++ei_node1_i;
+				    if (ei_node1_i == ei_graph->graph_size()) {
+						return *this;
+					}
+			    } while (ei_graph->connectivity(*this) == 0);
+		    }
+		} while (ei_node1_i < ei_graph->index_node2(*this));
 		return *this;
 	}
 	
-	bool operator==(const EdgeIterator& eit) {
-		if (ei_graph == eit_graph and ei_node1_i == eit.ei_node1_i and ei_node2_p == eit.ei_node2_p) {
+	bool operator==(const EdgeIterator& eit) const {
+		if (ei_graph == eit.ei_graph and ei_node1_i == eit.ei_node1_i and ei_node2_p == eit.ei_node2_p) {
 			return true;
 		}
 		return false;
@@ -523,6 +528,7 @@ class Graph {
     
     EdgeIterator(const graph_type* current_graph, size_type node1_i, size_type node2_p) {
 		ei_graph = const_cast<graph_type*>(current_graph);
+		//ei_graph = current_graph;
 		ei_node1_i = node1_i;
 		ei_node2_p = node2_p;
 	}
@@ -537,7 +543,7 @@ class Graph {
   // edge_iterator edge_end() const
   
   edge_iterator edge_begin() const {
-	  int i = 0;
+	  size_type i = 0;
 	  while (g_edges[i].size() == 0) {
 		  ++i;
 	  }
@@ -553,7 +559,11 @@ class Graph {
   }
   
   size_type connectivity(const edge_iterator& eit) const {
-	  return g_edges[ei_node1_i].size();
+	  return g_edges[eit.ei_node1_i].size();
+  }
+  
+  size_type graph_size() {
+	  return g_num_nodes;
   }
 
   //
