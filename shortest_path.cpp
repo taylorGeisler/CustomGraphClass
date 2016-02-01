@@ -17,6 +17,9 @@
 
 #include "Graph.hpp"
 
+#include <limits>
+#include <queue>
+
 
 /** Comparator that compares the distance from a given point p.
  */
@@ -24,7 +27,7 @@ struct MyComparator {
    Point p_;
    MyComparator(const Point& p) : p_(p) {
    };
-
+   
    template <typename NODE>
    bool operator()(const NODE& node1, const NODE& node2) const {
     (void) node1; (void) node2;    // Quiet compiler warning
@@ -49,9 +52,53 @@ struct MyComparator {
  * the root have value() -1.
  */
 int shortest_path_lengths(Graph<int>& g, const Point& point) {
-  // HW1 #4: YOUR CODE HERE
-  (void) g, (void) point;
-  return 0;
+
+  // Calculate root node
+  int init_val = g.size();
+  float closest_dist = std::numeric_limits<float>::max();
+  Graph<int>::size_type root;
+  for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
+	  float dist = norm((*ni).position()-point);
+	  Graph<int>::size_type node_index = (*ni).index();
+	  g.node(node_index).value() = init_val;
+	  if (dist < closest_dist) {
+		  root = (*ni).index();
+		  closest_dist = dist;
+	  }
+  }
+
+  // Breadth-First Search
+  std::vector<Graph<int>::size_type> parent (g.size(),g.size());
+  
+  std::queue<Graph<int>::size_type> Q;
+  g.node(root).value() = 0;
+  Q.push(root);
+  
+  while (!(Q.empty())) {
+	  Graph<int>::size_type current = Q.back();
+	  Q.pop();
+	  
+	  for (auto eit = g.node(current).edge_begin(); !(eit == g.node(current).edge_end()); ++eit ) {
+		  if ((*eit).node2().value() > ((*eit).node1().value())+1) {
+			  (*eit).node2().value() = (*eit).node1().value() + 1;
+			  Q.push((*eit).node2().index());
+		  }
+	  }
+  }
+  
+  // Calculate longest path
+  int longest_path = 0;
+  for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
+	  Graph<int>::node_type ni_node = *ni;
+	  if (ni_node.value() == init_val) {
+		  ni_node.value() = -1;
+		  std::cout << "yo" << std::endl;
+	  }
+	  if (ni_node.value() > longest_path) {
+		  longest_path = (*ni).value();
+	  }
+  }
+  return longest_path;
 }
 
 
@@ -94,6 +141,15 @@ int main(int argc, char** argv)
 
   // HW1 #4: YOUR CODE HERE
   // Use shortest_path_lengths to set the node values to the path lengths
+  Point root_point = Point(0,0,0);
+  int longest_path = shortest_path_lengths(graph, root_point);
+  std::cout << longest_path <<std::endl;
+  
   // Construct a Color functor and view with the SDLViewer
+  auto node_map = viewer.empty_node_map(graph);
+  viewer.add_nodes(graph.node_begin(), graph.node_end(), [longest_path](Graph<int>::node_type n){ float c = (float)n.value()/(float)(longest_path+1);
+	  if (c < 0.0) {c = 0;};return CME212::Color::make_heat(c);}, node_map);
+	  
+  viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
   return 0;
 }

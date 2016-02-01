@@ -159,23 +159,29 @@
     }
     
     node_value_type& value() {
-		return n_graph->g_values[n_index];
+		//return n_graph->g_values[n_index];
+		return const_cast<graph_type*>(n_graph)->g_values[n_index];
 	}
 	
 	const node_value_type& value() const {
 		return n_graph->g_values[n_index];
 	}
 	
-	size_type degree() {
-		return connectivity(n_index);
+	void value(node_value_type nv) const {
+		n_graph->set_value(nv, n_index);
+	}
+	
+	size_type degree() const {
+		//return const_cast<graph_type*>(n_graph)->connectivity(n_index);
+		return n_graph->connectivity(n_index);
 	}
 	
 	incident_iterator edge_begin() const {
-		return incident_iterator(n_graph,n_index,0);
+		return IncidentIterator(n_graph,*this,0);
 	}
 	
 	incident_iterator edge_end() const {
-		return incident_iterator(n_graph,n_index,degree());
+		return IncidentIterator(n_graph,*this,degree());
 	}
 
    private:
@@ -213,6 +219,10 @@
   /** Synonym for size(). */
   size_type num_nodes() const {
     return size();
+  }
+  
+  void set_value(const node_value_type v, size_type i) {
+	  g_values[i] = v;
   }
 
   /** Add a node to the graph, returning the added node.
