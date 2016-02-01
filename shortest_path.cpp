@@ -77,11 +77,13 @@ int shortest_path_lengths(Graph<int>& g, const Point& point) {
   Q.push(root);
   
   while (!(Q.empty())) {
-	  Graph<int>::size_type current = Q.back();
+	  Graph<int>::size_type current = Q.front();
 	  Q.pop();
 	  
 	  for (auto eit = g.node(current).edge_begin(); !(eit == g.node(current).edge_end()); ++eit ) {
-		  if ((*eit).node2().value() > ((*eit).node1().value())+1) {
+		  //if ((*eit).node2().value() > ((*eit).node1().value())+1) {
+		  if ((*eit).node2().value() == init_val) {
+	  
 			  (*eit).node2().value() = (*eit).node1().value() + 1;
 			  Q.push((*eit).node2().index());
 		  }
@@ -144,7 +146,7 @@ int main(int argc, char** argv)
   // Use shortest_path_lengths to set the node values to the path lengths
   Point root_point = Point(-1,0,1);
   int longest_path = shortest_path_lengths(graph, root_point);
-  
+  std::cout << longest_path << std::endl;
   // Construct a Color functor and view with the SDLViewer
   auto node_map = viewer.empty_node_map(graph);
   viewer.add_nodes(graph.node_begin(), graph.node_end(), [longest_path](Graph<int>::node_type n){ float c = (float)n.value()/(float)(longest_path+1);
