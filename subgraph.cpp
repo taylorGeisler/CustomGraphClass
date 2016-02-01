@@ -51,10 +51,12 @@ class filter_iterator
   // self_type& operator++();
   // bool operator==(const self_type&) const;
   
+  /** Return value_type of current iterator */
   value_type operator*() const {
 	  return *it_;
   }
   
+  /** Increment current iterator */
   self_type& operator++() {
 	      ++it_;
 	      while (!(p_(*it_)) and it_ != end_) {
@@ -63,6 +65,7 @@ class filter_iterator
 	      return *this;
       }
   
+  /** Test equality of two iterators */
   bool operator==(const self_type& fi) const {
       return (it_ == fi.it_ and end_ == fi.end_);
   }

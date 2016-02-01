@@ -158,28 +158,27 @@
 	  return false;
     }
     
+    /** Return the value stored in this node. */
     node_value_type& value() {
-		//return n_graph->g_values[n_index];
 		return const_cast<graph_type*>(n_graph)->g_values[n_index];
 	}
 	
+	/** Return the value stored in this node */
 	const node_value_type& value() const {
 		return n_graph->g_values[n_index];
 	}
 	
-	void value(node_value_type nv) const {
-		n_graph->set_value(nv, n_index);
-	}
-	
+	/** Return the degree of this node (number of edges) */
 	size_type degree() const {
-		//return const_cast<graph_type*>(n_graph)->connectivity(n_index);
 		return n_graph->connectivity(n_index);
 	}
 	
+	/** Return a begin iterator that iterates over edges of node */
 	incident_iterator edge_begin() const {
 		return IncidentIterator(n_graph,*this,0);
 	}
 	
+	/** Return an end iterator that iterates for edges of node */
 	incident_iterator edge_end() const {
 		return IncidentIterator(n_graph,*this,degree());
 	}
@@ -219,10 +218,6 @@
   /** Synonym for size(). */
   size_type num_nodes() const {
     return size();
-  }
-  
-  void set_value(const node_value_type v, size_type i) {
-	  g_values[i] = v;
   }
 
   /** Add a node to the graph, returning the added node.
@@ -347,11 +342,6 @@
    */
   size_type num_edges() const {
     return g_num_edges;
-      //size_type counter = 0;
-      //for (auto ei = edge_begin(); ei != edge_end(); ++ei) {
-		  //++counter;
-	  //}
-	  //return counter;
   }
 
   /** Return the edge with index @a i.
@@ -448,15 +438,18 @@
     // NodeIterator& operator++()
     // bool operator==(const NodeIterator&) const
     
+    /** Return node corresponding to this iterator */
     Node operator*() const {
 		return Node(ni_graph, ni_index);
 	}
 	
+	/** Increment iterator */
 	node_iterator& operator++() {
 		++ni_index;
 		return *this;
 	}
 	
+	/** Test equality of iterators */
 	bool operator==(const node_iterator& ni) const {
 		if (ni_index == ni.ni_index and ni_graph == ni.ni_graph) {
 			return true;
@@ -482,10 +475,12 @@
   // node_iterator node_begin() const
   // node_iterator node_end() const
   
+  /** Return begin node iterator of current graph */
   node_iterator node_begin() const {
 	  return NodeIterator(this, 0);
   }
   
+  /** Return end node iterator of current graph */
   node_iterator node_end() const {
 	  return NodeIterator(this, g_num_nodes);
   }
@@ -519,10 +514,13 @@
     // Edge operator*() const
     // EdgeIterator& operator++()
     // bool operator==(const EdgeIterator&) const
+    
+    /** Return edge of current edge iterator */
     Edge operator*() const {
 	    return Edge(ei_graph, ei_node1_i, ei_graph->index_node2(*this));
 	}
 	
+	/** Increment current edge iterator */
 	EdgeIterator& operator ++() {
 		do {
 		    ++ei_node2_p;
@@ -539,6 +537,7 @@
 		return *this;
 	}
 	
+	/** Test equality of two edge iterators */
 	bool operator==(const EdgeIterator& eit) const {
 		if (ei_graph == eit.ei_graph and ei_node1_i == eit.ei_node1_i and ei_node2_p == eit.ei_node2_p) {
 			return true;
@@ -568,6 +567,7 @@
   // edge_iterator edge_begin() const
   // edge_iterator edge_end() const
   
+  /** Return begin edge iterator of current graph */
   edge_iterator edge_begin() const {
 	  size_type i = 0;
 	  while (g_edges[i].size() == 0) {
@@ -576,26 +576,32 @@
 	  return edge_iterator(this,i,0);
   }
   
+  /** Return end edge iterator of current graph */
   edge_iterator edge_end() const {
 	  return edge_iterator(this,g_num_nodes,0);
   }
   
+  /** Return index of node two of current edge */
   size_type index_node2(const edge_iterator& eit) const {
 	  return g_edges[eit.ei_node1_i][eit.ei_node2_p];
   }
   
+  /** Return index of node two of current edge */
   size_type index_node2(const incident_iterator& iit) const {
 	  return g_edges[iit.iit_node][iit.iit_edge_p];
   }
   
+  /** Return connectivity of node 1 of current edge */
   size_type connectivity(const edge_iterator& eit) const {
 	  return g_edges[eit.ei_node1_i].size();
   }
   
+  /** Return connectivity of node n */
   size_type connectivity(const size_type n) const {
 	  return g_edges[n].size();
   }
   
+  /** Return total number of nodes of graph */
   size_type graph_size() {
 	  return g_num_nodes;
   }
@@ -629,15 +635,19 @@
     // Edge operator*() const
     // IncidentIterator& operator++()
     // bool operator==(const IncidentIterator&) const
+    
+    /** Return edge of current iterator */
     Edge operator*() const {
 		return Edge(iit_graph,iit_node,iit_graph->index_node2(*this));
 	}
 	
+	/** Increment current iterator */
 	incident_iterator& operator++() {
 		++iit_edge_p;
 		return *this;
 	}
 	
+	/** Test equality of two iterators */
 	bool operator==(const incident_iterator& iit) const {
 		if (iit_node == iit.iit_node and iit_edge_p == iit.iit_edge_p and iit_graph == iit.iit_graph) {
 			return true;

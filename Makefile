@@ -7,6 +7,7 @@
 EXEC += viewer
 EXEC += subgraph
 EXEC += shortest_path
+EXEC += picture
 
 # Get the shell name to determine the OS
 UNAME := $(shell uname)

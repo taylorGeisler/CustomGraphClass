@@ -22,6 +22,8 @@
 
 
 /** Comparator that compares the distance from a given point p.
+ * 
+ * Not employed in current implementation
  */
 struct MyComparator {
    Point p_;
@@ -54,7 +56,7 @@ struct MyComparator {
 int shortest_path_lengths(Graph<int>& g, const Point& point) {
 
   // Calculate root node
-  int init_val = g.size();
+  int init_val = g.size(); // Initialize values to large number
   float closest_dist = std::numeric_limits<float>::max();
   Graph<int>::size_type root;
   for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
@@ -90,12 +92,11 @@ int shortest_path_lengths(Graph<int>& g, const Point& point) {
   int longest_path = 0;
   for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
 	  Graph<int>::node_type ni_node = *ni;
-	  if (ni_node.value() == init_val) {
+	  if (ni_node.value() == init_val) { //If node is not connected
 		  ni_node.value() = -1;
-		  std::cout << "yo" << std::endl;
 	  }
 	  if (ni_node.value() > longest_path) {
-		  longest_path = (*ni).value();
+		  longest_path = ni_node.value();
 	  }
   }
   return longest_path;
@@ -141,14 +142,13 @@ int main(int argc, char** argv)
 
   // HW1 #4: YOUR CODE HERE
   // Use shortest_path_lengths to set the node values to the path lengths
-  Point root_point = Point(0,0,0);
+  Point root_point = Point(-1,0,1);
   int longest_path = shortest_path_lengths(graph, root_point);
-  std::cout << longest_path <<std::endl;
   
   // Construct a Color functor and view with the SDLViewer
   auto node_map = viewer.empty_node_map(graph);
   viewer.add_nodes(graph.node_begin(), graph.node_end(), [longest_path](Graph<int>::node_type n){ float c = (float)n.value()/(float)(longest_path+1);
-	  if (c < 0.0) {c = 0;};return CME212::Color::make_heat(c);}, node_map);
+	  if (c < 0.0) {c = 0.0;};return CME212::Color::make_heat(c);}, node_map);
 	  
   viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
   return 0;
