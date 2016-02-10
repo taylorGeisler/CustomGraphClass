@@ -39,17 +39,10 @@ class filter_iterator
   // Constructor
   filter_iterator(const Pred& p, const It& first, const It& last)
       : p_(p), it_(first), end_(last) {
-    // HW1 #4: YOUR CODE HERE
     while (!(p_(*it_)) and it_ != end_) {
 		++it_;
 	}
   }
-
-  // HW1 #4: YOUR CODE HERE
-  // Supply definitions AND SPECIFICATIONS for:
-  // value_type operator*() const;
-  // self_type& operator++();
-  // bool operator==(const self_type&) const;
   
   /** Return value_type of current iterator */
   value_type operator*() const {
@@ -88,11 +81,6 @@ filter_iterator<Pred,Iter> make_filtered(const Iter& it, const Iter& end,
                                          const Pred& p) {
   return filter_iterator<Pred,Iter>(p, it, end);
 }
-
-// HW1 #4: YOUR CODE HERE
-// Specify and write an interesting predicate on the nodes.
-// Explain what your predicate is intended to do and test it.
-// If you'd like you may create new nodes and tets files.
 
 /** Test predicate for HW1 #4 */
 struct SlicePredicate {
@@ -140,7 +128,6 @@ int main(int argc, char** argv)
   CME212::SDLViewer viewer;
   viewer.launch();
 
-  // HW1 #4: YOUR CODE HERE
   // Use the filter_iterator to plot an induced subgraph.
   auto node_map = viewer.empty_node_map(graph);
   SlicePredicate predicate;

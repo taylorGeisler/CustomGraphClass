@@ -151,7 +151,6 @@
      * then by index if nodes of same graph
      */
     bool operator<(const Node& n) const {
-      // HW0: YOUR CODE HERE
       if ((n_graph <n.n_graph) or (n_graph == n.n_graph and n_index < n.n_index)){
 		  return true;
 	  }
@@ -186,10 +185,6 @@
    private:
     // Allow Graph to access Node's private member data and functions.
     friend class Graph;
-    // HW0: YOUR CODE HERE
-    // Use this space to declare private data members and methods for Node
-    // that will not be visible to users, but may be useful within Graph.
-    // i.e. Graph needs a way to construct valid Node objects
 	
 	const graph_type* n_graph = nullptr;
     size_type n_index;
@@ -211,7 +206,6 @@
    * Complexity: O(1).
    */
   size_type size() const {
-    // HW0: YOUR CODE HERE
     return g_nodes.size();
   }
 
@@ -228,7 +222,6 @@
    * Complexity: O(1) amortized operations.
    */
   Node add_node(const Point& position, const node_value_type& v = node_value_type()) {
-    // HW0: YOUR CODE HERE
     g_nodes.push_back(position);
     g_values.push_back(v);
     ++g_num_nodes;
@@ -243,7 +236,6 @@
    * Complexity: O(1).
    */
   bool has_node(const Node& n) const {
-    // HW0: YOUR CODE HERE
     if (n.n_graph == this){
 		return true;
 	}
@@ -257,7 +249,6 @@
    * Complexity: O(1).
    */
   Node node(size_type i) const {
-    // HW0: YOUR CODE HERE
     return Node(this, i);
   }
 
@@ -275,18 +266,15 @@
    public:
     /** Construct an invalid Edge. */
     Edge() {
-      // HW0: YOUR CODE HERE
     }
 
     /** Return a node of this Edge */
     Node node1() const {
-      // HW0: YOUR CODE HERE
       return Node(e_graph,e_node1);
     }
 
     /** Return the other node of this Edge */
     Node node2() const {
-      // HW0: YOUR CODE HERE
       return Node(e_graph,e_node2);
     }
 
@@ -317,10 +305,6 @@
    private:
     // Allow Graph to access Edge's private member data and functions.
     friend class Graph;
-    // HW0: YOUR CODE HERE
-    // Use this space to declare private data members and methods for Edge
-    // that will not be visible to users, but may be useful within Graph.
-    // i.e. Graph needs a way to construct valid Edge objects
     const graph_type* e_graph = nullptr;
     size_type e_node1, e_node2;
     
@@ -431,12 +415,6 @@
     /** Construct an invalid NodeIterator. */
     NodeIterator() {
     }
-
-    // HW1 #2: YOUR CODE HERE
-    // Supply definitions AND SPECIFICATIONS for:
-    // Node operator*() const
-    // NodeIterator& operator++()
-    // bool operator==(const NodeIterator&) const
     
     /** Return node corresponding to this iterator */
     Node operator*() const {
@@ -469,11 +447,6 @@
 	}
     
   };
-
-  // HW1 #2: YOUR CODE HERE
-  // Supply definitions AND SPECIFICATIONS for:
-  // node_iterator node_begin() const
-  // node_iterator node_end() const
   
   /** Return begin node iterator of current graph */
   node_iterator node_begin() const {
@@ -508,12 +481,6 @@
     /** Construct an invalid EdgeIterator. */
     EdgeIterator() {
     }
-
-    // HW1 #3: YOUR CODE HERE
-    // Supply definitions AND SPECIFICATIONS for:
-    // Edge operator*() const
-    // EdgeIterator& operator++()
-    // bool operator==(const EdgeIterator&) const
     
     /** Return edge of current edge iterator */
     Edge operator*() const {
@@ -553,19 +520,10 @@
     
     EdgeIterator(const graph_type* current_graph, size_type node1_i, size_type node2_p) {
 		ei_graph = const_cast<graph_type*>(current_graph);
-		//ei_graph = current_graph;
 		ei_node1_i = node1_i;
 		ei_node2_p = node2_p;
 	}
-	
-	
-    // HW1 #3: YOUR CODE HERE
   };
-
-  // HW1 #3: YOUR CODE HERE
-  // Supply definitions AND SPECIFICATIONS for:
-  // edge_iterator edge_begin() const
-  // edge_iterator edge_end() const
   
   /** Return begin edge iterator of current graph */
   edge_iterator edge_begin() const {
@@ -629,12 +587,6 @@
     /** Construct an invalid IncidentIterator. */
     IncidentIterator() {
     }
-
-    // HW1 #5: YOUR CODE HERE
-    // Supply definitions AND SPECIFICATIONS for:
-    // Edge operator*() const
-    // IncidentIterator& operator++()
-    // bool operator==(const IncidentIterator&) const
     
     /** Return edge of current iterator */
     Edge operator*() const {
@@ -657,7 +609,6 @@
 
    private:
     friend class Graph;
-    // HW1 #5: YOUR CODE HERE
     graph_type* iit_graph;
     size_type iit_node;
     size_type iit_edge_p;
@@ -670,10 +621,6 @@
   };
 
  private:
-
-  // HW0: YOUR CODE HERE
-  // Use this space for your Graph class's internals:
-  //   helper functions, data members, and so forth.
   
   std::vector<Point> g_nodes;
   std::vector<std::vector<size_type>> g_edges;

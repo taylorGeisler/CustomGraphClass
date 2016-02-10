@@ -83,9 +83,7 @@ int shortest_path_lengths(Graph<int>& g, const Point& point) {
 	  Q.pop();
 	  
 	  for (auto eit = g.node(current).edge_begin(); !(eit == g.node(current).edge_end()); ++eit ) {
-		  //if ((*eit).node2().value() > ((*eit).node1().value())+1) {
 		  if ((*eit).node2().value() == -1) {
-	  
 			  (*eit).node2().value() = (*eit).node1().value() + 1;
 			  Q.push((*eit).node2().index());
 		  }
@@ -96,9 +94,6 @@ int shortest_path_lengths(Graph<int>& g, const Point& point) {
   int longest_path = 0;
   for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
 	  Graph<int>::node_type ni_node = *ni;
-	  if (ni_node.value() == init_val) { //If node is not connected
-		  ni_node.value() = -1;
-	  }
 	  if (ni_node.value() > longest_path) {
 		  longest_path = ni_node.value();
 	  }
@@ -144,7 +139,6 @@ int main(int argc, char** argv)
   CME212::SDLViewer viewer;
   viewer.launch();
 
-  // HW1 #4: YOUR CODE HERE
   // Use shortest_path_lengths to set the node values to the path lengths
   Point root_point = Point(-1,0,1);
   int longest_path = shortest_path_lengths(graph, root_point);
