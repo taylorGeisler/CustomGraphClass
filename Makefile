@@ -7,7 +7,12 @@
 EXEC += viewer
 EXEC += subgraph
 EXEC += shortest_path
-EXEC += picture
+<<<<<<< HEAD
+=======
+EXEC += mass_spring
+EXEC += test_nodes
+EXEC += test_edges
+>>>>>>> CME212/master
 
 # Get the shell name to determine the OS
 UNAME := $(shell uname)
