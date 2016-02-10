@@ -74,7 +74,6 @@
 
   /** Construct an empty graph. */
   Graph()
-    // HW0: YOUR CODE HERE
    : g_nodes(), g_edges(), g_values() {
 	   g_num_nodes = 0;
 	   g_num_edges = 0;
@@ -113,18 +112,19 @@
      * Invalid node index not initialized to value
      */
     Node() {
-      // HW0: YOUR CODE HERE
     }
 
     /** Return this node's position. */
     const Point& position() const {
-      // HW0: YOUR CODE HERE
       return n_graph->g_nodes[n_index];
     }
+    
+    Point& position() {
+		return n_graph->g_nodes[n_index];
+	}
 
     /** Return this node's index, a number in the range [0, graph_size). */
     size_type index() const {
-      // HW0: YOUR CODE HERE
       return n_index;
     }
 
@@ -133,7 +133,6 @@
      * Equal nodes have the same graph and the same index.
      */
     bool operator==(const Node& n) const {
-      // HW0: YOUR CODE HERE
       if (n_index == n.n_index && n_graph == n.n_graph){
 		  return true;
       }
@@ -186,7 +185,7 @@
     // Allow Graph to access Node's private member data and functions.
     friend class Graph;
 	
-	const graph_type* n_graph = nullptr;
+    graph_type* n_graph = nullptr;
     size_type n_index;
     
     /** Construct a valid Node object
@@ -196,7 +195,7 @@
      */
     Node(const graph_type* node_graph, size_type node_index) {
 		n_index = node_index;
-		n_graph = node_graph;		
+		n_graph = const_cast<graph_type*>(node_graph);	
 	}
     
   };
@@ -305,7 +304,7 @@
    private:
     // Allow Graph to access Edge's private member data and functions.
     friend class Graph;
-    const graph_type* e_graph = nullptr;
+    graph_type* e_graph = nullptr;
     size_type e_node1, e_node2;
     
     /** Construct a valid Edge object
@@ -314,7 +313,7 @@
      * 
      */
     Edge(const graph_type* edge_graph, size_type edge_node1, size_type edge_node2) {
-		e_graph = edge_graph;
+		e_graph = const_cast<graph_type*>(edge_graph);
 		e_node1 = edge_node1;
 		e_node2 = edge_node2;
 	}

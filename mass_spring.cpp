@@ -81,6 +81,9 @@ struct Problem1Force {
   template <typename NODE>
   Point operator()(NODE n, double t) {
     // HW2 #1: YOUR CODE HERE
+    if (n.position() == Point(0,0,0) || n.position() == Point(1,0,0)) {
+		return Point(0,0,0);
+	}
     (void) n; (void) t;     // silence compiler warnings
     return Point();
   }
@@ -123,6 +126,7 @@ int main(int argc, char** argv) {
 
   // HW2 #1 YOUR CODE HERE
   // Set initial conditions for your nodes, if necessary.
+  
 
   // Print out the stats
   std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
