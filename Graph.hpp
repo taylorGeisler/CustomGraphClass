@@ -312,11 +312,20 @@
 	
 	edge_value_type& value() {
 		size_type i = 0;
-		for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
-		    if ((*eit).node2().index() == e_node2) {
-		        return const_cast<graph_type*>(e_graph)->g_evalues[e_node1][i];
-			}
-			++i;
+		if (e_node1 < e_node2) {
+		    for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
+		        if ((*eit).node2().index() == e_node2) {
+		            return const_cast<graph_type*>(e_graph)->g_evalues[e_node1][i];
+			    }
+			    ++i;
+		    }
+	    } else {
+			for (auto eit = e_graph->node(e_node2).edge_begin(); !(eit == e_graph->node(e_node2).edge_end()); ++eit ) {
+		        if ((*eit).node1().index() == e_node1) {
+		            return const_cast<graph_type*>(e_graph)->g_evalues[e_node2][i];
+			    }
+			    ++i;
+		    }
 		}
 	}
 	
