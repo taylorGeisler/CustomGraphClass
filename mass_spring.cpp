@@ -59,10 +59,11 @@ double symp_euler_step(G& g, double t, double dt, F force) {
   // Compute the t+dt position
   for (auto it = g.node_begin(); it != g.node_end(); ++it) {
     auto n = *it;
-
-    // Update the position of the node according to its velocity
-    // x^{n+1} = x^{n} + v^{n} * dt
-    n.position() += n.value().vel * dt;
+    if (n.position() != Point(0,0,0) and n.position() != Point(1,0,0)) {	
+        // Update the position of the node according to its velocity
+        // x^{n+1} = x^{n} + v^{n} * dt
+        n.position() += n.value().vel * dt;
+	}
   }
 
   // Compute the t+dt velocity
@@ -75,22 +76,54 @@ double symp_euler_step(G& g, double t, double dt, F force) {
   return t + dt;
 }
 
+template <typename F1, typename F2>
+struct CombinedForce {
+	F1 f1;
+	F2 f2;
+	template <typename NODE>
+	Point operator()(NODE n, double t) {
+		return f1(n,t) + f2(n,t);
+	}
+};
 
-/** Force function object for HW2 #1. */
-struct Problem1Force {
-  /** Return the force applying to @a n at time @a t.
+template <typename F1, typename F2>
+CombinedForce<F1,F2> make_combined_force(F1 force1, F2 force2) {
+	CombinedForce<F1,F2> force;
+	force.f1 = force1;
+	force.f2 = force2;
+	return force;
+}
+
+template <typename F1, typename F2, typename F3>
+CombinedForce<F1,CombinedForce<F2,F3>> make_combined_force(F1 force1, F2 force2, F3 force3) {
+	CombinedForce<F2,F3> force23;
+	CombinedForce<F1,CombinedForce<F2,F3>> force;
+	force23.f1 = force2;
+	force23.f2 = force3;
+	force.f1 = force1;
+	force.f2 = force23;
+	return force;
+}
+
+struct GravityForce {
+  /** Return the gravity force applying to @a n at time @a t.
    *
-   * For HW2 #1, this is a combination of mass-spring force and gravity,
-   * except that points at (0, 0, 0) and (1, 0, 0) never move. We can
-   * model that by returning a zero-valued force. */
+   */
   template <typename NODE>
   Point operator()(NODE n, double t) {
-    // HW2 #1: YOUR CODE HERE
-    if (n.position() == Point(0,0,0) || n.position() == Point(1,0,0)) {
-		return Point(0,0,0);
-	} else {
-		Point F = Point(0,0,0);
-		
+		//Gravity Force
+		double m = n.value().mass;
+		return Point(0,0,-grav)*m;
+	}
+};
+
+struct MassSpringForce {
+  /** Return the mass spring force applying to @a n at time @a t.
+   *
+   */
+  template <typename NODE>
+  Point operator()(NODE n, double t) {
+	    Point F = Point(0,0,0);
 		//Spring Forces
 		//Iterate over each edge
 		for (auto eit = n.edge_begin(); !(eit == n.edge_end()); ++eit ) {
@@ -98,14 +131,20 @@ struct Problem1Force {
 			double F_mag = (*eit).value().K*((*eit).value().L_init-(*eit).length());
 			F += F_unit_dir*F_mag;
 		}
-		
-		//Gravity Force
-		double m = n.value().mass;
-		F += Point(0,0,-grav)*m;
 		return F;
 	}
-    return Point();
-  }
+};
+
+struct DampingForce {
+  /** Return the damping force applying to @a n at time @a t.
+   *
+   */
+  template <typename NODE>
+  Point operator()(NODE n, double t) {
+	    double c = 0.0;
+		//Damping force
+		return n.value().vel*-c;
+	}
 };
 
 
@@ -172,7 +211,7 @@ int main(int argc, char** argv) {
 
   for (double t = t_start; t < t_end; t += dt) {
     //std::cout << "t = " << t << std::endl;
-    symp_euler_step(graph, t, dt, Problem1Force());
+    symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce(),DampingForce()));
     // Update viewer with nodes' new positions
     viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
     viewer.set_label(t);
