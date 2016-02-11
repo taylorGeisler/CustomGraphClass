@@ -300,6 +300,10 @@
 	    }
       return false;
     }
+    
+    double length() const {
+		return norm(e_graph->node(e_node1).position()-e_graph->node(e_node2).position());
+	}
 
    private:
     // Allow Graph to access Edge's private member data and functions.

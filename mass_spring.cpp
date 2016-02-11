@@ -24,7 +24,7 @@ static constexpr double grav = 9.81;
 
 /** Custom structure of data to store with Nodes */
 struct NodeData {
-  Point vel;       //< Node velocity
+  Point vel = Point(0,0,0);       //< Node velocity
   double mass;     //< Node mass
 };
 
@@ -81,10 +81,26 @@ struct Problem1Force {
   template <typename NODE>
   Point operator()(NODE n, double t) {
     // HW2 #1: YOUR CODE HERE
+    double L_init = 0.04166666667;
+    double K = 100;
     if (n.position() == Point(0,0,0) || n.position() == Point(1,0,0)) {
 		return Point(0,0,0);
+	} else {
+		Point F = Point(0,0,0);
+		
+		//Spring Forces
+		//Iterate over each edge
+		for (auto eit = n.edge_begin(); !(eit == n.edge_end()); ++eit ) {
+			Point U = ((*eit).node1().position() - (*eit).node2().position())/(*eit).length();
+			double F_mag = K*(L_init-(*eit).length());
+			F += U*F_mag;
+		}
+		
+		//Gravity Force
+		double m = n.value().mass;
+		F += Point(0,0,-grav)*m;
+		return F;
 	}
-    (void) n; (void) t;     // silence compiler warnings
     return Point();
   }
 };
@@ -126,7 +142,9 @@ int main(int argc, char** argv) {
 
   // HW2 #1 YOUR CODE HERE
   // Set initial conditions for your nodes, if necessary.
-  
+  for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
+	  (*it).value().mass = 1.0/double(graph.size());
+  }
 
   // Print out the stats
   std::cout << graph.num_nodes() << " " << graph.num_edges() << std::endl;
