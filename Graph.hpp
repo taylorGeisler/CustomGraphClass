@@ -229,8 +229,10 @@
     ++g_num_nodes;
     std::vector<size_type> empty_size_vector;
     g_edges.push_back(empty_size_vector);
-    std::vector<edge_value_type> empty_edge_value_vector;
-    g_evalues.push_back(empty_edge_value_vector);
+    g_evalues.resize(g_num_nodes);
+    for (size_type i = 0; i < g_num_nodes; ++i) {
+		g_evalues[i].resize(g_num_nodes);
+	}
     return Node(this, g_nodes.size()-1);
   }
 
@@ -311,33 +313,29 @@
 	}
 	
 	edge_value_type& value() {
-		size_type i = 0;
-		if (e_node1 < e_node2) {
-		    for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
-		        if ((*eit).node2().index() == e_node2) {
-		            return const_cast<graph_type*>(e_graph)->g_evalues[e_node1][i];
-			    }
-			    ++i;
-		    }
-	    } else {
-			for (auto eit = e_graph->node(e_node2).edge_begin(); !(eit == e_graph->node(e_node2).edge_end()); ++eit ) {
-		        if ((*eit).node1().index() == e_node1) {
-		            return const_cast<graph_type*>(e_graph)->g_evalues[e_node2][i];
-			    }
-			    ++i;
-		    }
-		}
+		size_type i_min = std::min(e_node1,e_node2);
+		size_type i_max = std::max(e_node1,e_node2);
+		return const_cast<graph_type*>(e_graph)->g_evalues[i_min][i_max];
 	}
+		
+		//for (auto eit = e_graph->node(i_min).edge_begin(); !(eit == e_graph->node(i_min).edge_end()); ++eit) {
+			//if ((*eit).node2().index() == i_max) {
+				//std::cout<<"HI"<<std::endl;
+				//return const_cast<graph_type*>(e_graph)->g_evalues[i_min][eit.iit_edge_p];
+			//}
+		//}
+	//std::cout<<"FAILED"<<std::endl;
+	//}
 	
-	const edge_value_type& value() const {
-		size_type i = 0;
-		for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
-		    if ((*eit).node2().index() == e_node2) {
-		        return e_graph->e_values[e_node1][i];
-			}
-			++i;
-		}
-	}
+	//const edge_value_type& value() const {
+		//size_type i = 0;
+		//for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
+		    //if ((*eit).node2().index() == e_node2) {
+		        //return e_graph->e_values[e_node1][i];
+			//}
+			//++i;
+		//}
+	//}
 
    private:
     // Allow Graph to access Edge's private member data and functions.
@@ -412,8 +410,12 @@
     if (!has_edge(a, b)) {
 	    g_edges[a.index()].push_back(b.index());
 	    g_edges[b.index()].push_back(a.index());
-	    g_evalues[a.index()].push_back(v);
-	    g_evalues[b.index()].push_back(v);
+	    g_evalues[std::min(a.index(),b.index())][std::max(a.index(),b.index())] = v;
+	    //if (a.index() < b.index()) {
+	        //g_evalues[a.index()].push_back(v);
+		//} else {	
+	        //g_evalues[b.index()].push_back(v);
+		//}
 	    ++g_num_edges;
 	}
     return new_edge;

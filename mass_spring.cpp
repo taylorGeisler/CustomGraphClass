@@ -29,8 +29,8 @@ struct NodeData {
 };
 
 struct EdgeData {
-	double L_init = 0.0;
-	double K = 99;
+	double L_init;
+	double K;
 };
 
 // HW2 #1 YOUR CODE HERE
@@ -86,7 +86,6 @@ struct Problem1Force {
   template <typename NODE>
   Point operator()(NODE n, double t) {
     // HW2 #1: YOUR CODE HERE
-    double L_init = 0.04166666667;
     if (n.position() == Point(0,0,0) || n.position() == Point(1,0,0)) {
 		return Point(0,0,0);
 	} else {
@@ -95,10 +94,9 @@ struct Problem1Force {
 		//Spring Forces
 		//Iterate over each edge
 		for (auto eit = n.edge_begin(); !(eit == n.edge_end()); ++eit ) {
-			Point U = ((*eit).node1().position() - (*eit).node2().position())/(*eit).length();
-			double F_mag = (*eit).value().K*(L_init-(*eit).length());
-			F += U*F_mag;
-			std::cout <<(*eit).value().K<<std::endl;
+			Point F_unit_dir = ((*eit).node1().position() - (*eit).node2().position())/(*eit).length();
+			double F_mag = (*eit).value().K*((*eit).value().L_init-(*eit).length());
+			F += F_unit_dir*F_mag;
 		}
 		
 		//Gravity Force
@@ -135,11 +133,10 @@ int main(int argc, char** argv) {
   while (CME212::getline_parsed(tets_file, t)) {
     graph.add_edge(nodes[t[0]], nodes[t[1]]);
     graph.add_edge(nodes[t[0]], nodes[t[2]]);
-#if 0
-    // Diagonal edges: include as of HW2 #2
+
     graph.add_edge(nodes[t[0]], nodes[t[3]]);
     graph.add_edge(nodes[t[1]], nodes[t[2]]);
-#endif
+
     graph.add_edge(nodes[t[1]], nodes[t[3]]);
     graph.add_edge(nodes[t[2]], nodes[t[3]]);
   }
@@ -152,7 +149,7 @@ int main(int argc, char** argv) {
   
   for (auto eit = graph.edge_begin(); eit != graph.edge_end(); ++eit) {
 	  (*eit).value().K = 100;
-	  //(*eit).value().L_init = (*eit).length();
+	  (*eit).value().L_init = (*eit).length();
   }
 
   // Print out the stats
