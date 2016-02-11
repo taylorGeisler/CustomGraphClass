@@ -28,9 +28,14 @@ struct NodeData {
   double mass;     //< Node mass
 };
 
+struct EdgeData {
+	double L_init = 0.0;
+	double K = 99;
+};
+
 // HW2 #1 YOUR CODE HERE
 // Define your Graph type
-typedef Graph<NodeData> GraphType;
+typedef Graph<NodeData,EdgeData> GraphType;
 typedef typename GraphType::node_type Node;
 typedef typename GraphType::edge_type Edge;
 
@@ -82,7 +87,6 @@ struct Problem1Force {
   Point operator()(NODE n, double t) {
     // HW2 #1: YOUR CODE HERE
     double L_init = 0.04166666667;
-    double K = 100;
     if (n.position() == Point(0,0,0) || n.position() == Point(1,0,0)) {
 		return Point(0,0,0);
 	} else {
@@ -92,8 +96,9 @@ struct Problem1Force {
 		//Iterate over each edge
 		for (auto eit = n.edge_begin(); !(eit == n.edge_end()); ++eit ) {
 			Point U = ((*eit).node1().position() - (*eit).node2().position())/(*eit).length();
-			double F_mag = K*(L_init-(*eit).length());
+			double F_mag = (*eit).value().K*(L_init-(*eit).length());
 			F += U*F_mag;
+			std::cout <<(*eit).value().K<<std::endl;
 		}
 		
 		//Gravity Force
@@ -123,7 +128,6 @@ int main(int argc, char** argv) {
   std::vector<typename GraphType::node_type> nodes;
   while (CME212::getline_parsed(nodes_file, p))
     nodes.push_back(graph.add_node(p));
-
   // Create a tets_file from the second input argument
   std::ifstream tets_file(argv[2]);
   // Interpret each line of the tets_file as four ints which refer to nodes
@@ -144,6 +148,11 @@ int main(int argc, char** argv) {
   // Set initial conditions for your nodes, if necessary.
   for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
 	  (*it).value().mass = 1.0/double(graph.size());
+  }
+  
+  for (auto eit = graph.edge_begin(); eit != graph.edge_end(); ++eit) {
+	  (*eit).value().K = 100;
+	  //(*eit).value().L_init = (*eit).length();
   }
 
   // Print out the stats

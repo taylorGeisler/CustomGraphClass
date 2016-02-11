@@ -19,7 +19,7 @@
  * Users can add and retrieve nodes and edges. Edges are unique (there is at
  * most one edge between any pair of distinct nodes).
  */
- template <typename V>
+ template <typename V, typename E>
  class Graph {
  private:
 
@@ -42,6 +42,9 @@
   
   /** Type of values stored in node */
   typedef V node_value_type;
+  
+  /** Type of values stored in edge */
+  typedef E edge_value_type;
 
   /** Predeclaration of Edge type. */
   class Edge;
@@ -74,7 +77,7 @@
 
   /** Construct an empty graph. */
   Graph()
-   : g_nodes(), g_edges(), g_values() {
+   : g_nodes(), g_edges(), g_evalues(), g_values() {
 	   g_num_nodes = 0;
 	   g_num_edges = 0;
   }
@@ -224,8 +227,10 @@
     g_nodes.push_back(position);
     g_values.push_back(v);
     ++g_num_nodes;
-    std::vector<size_type> empty_vector;
-    g_edges.push_back(empty_vector);
+    std::vector<size_type> empty_size_vector;
+    g_edges.push_back(empty_size_vector);
+    std::vector<edge_value_type> empty_edge_value_vector;
+    g_evalues.push_back(empty_edge_value_vector);
     return Node(this, g_nodes.size()-1);
   }
 
@@ -304,6 +309,26 @@
     double length() const {
 		return norm(e_graph->node(e_node1).position()-e_graph->node(e_node2).position());
 	}
+	
+	edge_value_type& value() {
+		size_type i = 0;
+		for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
+		    if ((*eit).node2().index() == e_node2) {
+		        return const_cast<graph_type*>(e_graph)->g_evalues[e_node1][i];
+			}
+			++i;
+		}
+	}
+	
+	const edge_value_type& value() const {
+		size_type i = 0;
+		for (auto eit = e_graph->node(e_node1).edge_begin(); !(eit == e_graph->node(e_node1).edge_end()); ++eit ) {
+		    if ((*eit).node2().index() == e_node2) {
+		        return e_graph->e_values[e_node1][i];
+			}
+			++i;
+		}
+	}
 
    private:
     // Allow Graph to access Edge's private member data and functions.
@@ -373,11 +398,13 @@
    *
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
-  Edge add_edge(const Node& a, const Node& b) {
+  Edge add_edge(const Node& a, const Node& b, const edge_value_type& v = edge_value_type()) {
     edge_type new_edge = Edge(this, a.index(), b.index());
     if (!has_edge(a, b)) {
 	    g_edges[a.index()].push_back(b.index());
 	    g_edges[b.index()].push_back(a.index());
+	    g_evalues[a.index()].push_back(v);
+	    g_evalues[b.index()].push_back(v);
 	    ++g_num_edges;
 	}
     return new_edge;
@@ -392,6 +419,7 @@
     // HW0: YOUR CODE HERE
     g_nodes.clear();
     g_edges.clear();
+    g_evalues.clear();
     g_values.clear();
   }
 
@@ -627,6 +655,7 @@
   
   std::vector<Point> g_nodes;
   std::vector<std::vector<size_type>> g_edges;
+  std::vector<std::vector<edge_value_type>> g_evalues;
   std::vector<node_value_type> g_values;
   size_type g_num_nodes;
   size_type g_num_edges;
