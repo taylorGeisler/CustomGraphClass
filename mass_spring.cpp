@@ -39,6 +39,22 @@ typedef Graph<NodeData,EdgeData> GraphType;
 typedef typename GraphType::node_type Node;
 typedef typename GraphType::edge_type Edge;
 
+class con_wall {
+	public:
+	  void operator() (GraphType& g, double t) {
+		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
+			  if (dot((*it).position(),Point(0,0,1)) < zmax) {
+				  (*it).position()[2] = zmax;
+				  (*it).value().vel[2] = 0;
+			  }
+		  }
+	  }
+	
+	private:
+	  double zmax = -0.75;
+	
+};
+
 
 /** Change a graph's nodes according to a step of the symplectic Euler
  *    method with the given node force.
@@ -72,9 +88,14 @@ double symp_euler_step(G& g, double t, double dt, F force) {
     // v^{n+1} = v^{n} + F(x^{n+1},t) * dt / m
     n.value().vel += force(n, t) * (dt / n.value().mass);
   }
+  
+  con_wall wall_constraint;
+  wall_constraint(g, t);
 
   return t + dt;
 }
+
+
 
 template <typename F1, typename F2>
 struct CombinedForce {
