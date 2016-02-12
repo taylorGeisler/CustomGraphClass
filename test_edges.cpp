@@ -64,7 +64,6 @@ int main()
 
   sf_print(g.add_edge(g.node(0), g.node(1)), "Inserting Edge");
   sf_print(g.add_edge(g.node(0), g.node(1)), "Inserting Edge Again");
-
   sf_print(g.num_edges() == 1, "Graph has 1 Edge");
 
   g.remove_node(g.node(1));
@@ -126,7 +125,6 @@ int main()
         ++count_edges;
     }
   }
-
   sf_print(count_edges == g.num_edges(), "Edge count agrees");
 
   // Remove 50 Nodes...
@@ -144,7 +142,8 @@ int main()
         ++count_edges;
     }
   }
-
+  //std::cout << "Edge Count " << g.num_edges() <<std::endl;
+  //std::cout << count_edges <<std::endl;
   sf_print(count_edges == g.num_edges(), "Edge count agrees");
 
   std::cerr << "Clearing...";

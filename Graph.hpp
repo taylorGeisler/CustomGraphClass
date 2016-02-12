@@ -278,6 +278,14 @@
   }
   
   size_type remove_node(const Node& n) {
+	  for (size_type k = 0; k < g_edges[n.index()].size();) {
+		  const node_type n2 = node(g_edges[n.index()][k]);
+		  if (has_edge(n,n2)) {
+			  remove_edge(n,n2);
+		  } else {
+			  ++k;
+		  }
+	  }
 	  g_idx2uid.erase(g_idx2uid.begin() + n.index());
 	  --g_num_nodes;
 	  //remove edges
@@ -430,16 +438,64 @@
     return new_edge;
   }
   
-  size_type remove_edge(const Node&, const Node&) {
-	  
+  size_type remove_edge(const Node& n1, const Node& n2) {
+	  if (has_edge(n1,n2)) {
+		  index_type i1 = n1.index();
+		  index_type i2 = n2.index();
+		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
+			  if (g_edges[i1][k] == i2) {
+				  g_edges[i1].erase(g_edges[i1].begin() + k);
+			  }
+		  }
+		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
+			  if (g_edges[i2][k] == i1) {
+				  g_edges[i2].erase(g_edges[i2].begin() + k);
+			  }
+		  }
+		  --g_num_edges;
+      }
+	  return 0;
   }
   
-  size_type remove_edge(const Edge&) {
-	  
+  size_type remove_edge(const Edge& e) {
+	  if (has_edge(e.node1(),e.node2())) {
+		  index_type i1 = e.node1().index();
+		  index_type i2 = e.node2().index();
+		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
+			  if (g_edges[i1][k] == i2) {
+				  g_edges[i1].erase(g_edges[i1].begin() + k);
+			  }
+		  }
+		  
+		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
+			  if (g_edges[i2][k] == i1) {
+				  g_edges[i2].erase(g_edges[i2].begin() + k);
+			  }
+		  }
+		  --g_num_edges;
+      }
+	  return 0;
   }
   
   edge_iterator remove_edge(edge_iterator e_it) {
-	  
+	  edge_type e = (*e_it);
+	  if (has_edge(e.node1(),e.node2())) {
+		  index_type i1 = e.node1().index();
+		  index_type i2 = e.node2().index();
+		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
+			  if (g_edges[i1][k] == i2) {
+				  g_edges[i1].erase(g_edges[i1].begin() + k);
+			  }
+		  }
+		  
+		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
+			  if (g_edges[i2][k] == i1) {
+				  g_edges[i2].erase(g_edges[i2].begin() + k);
+			  }
+		  }
+		  --g_num_edges;
+      }
+	  return 0;
   }
 
   /** Remove all nodes and edges from this graph.

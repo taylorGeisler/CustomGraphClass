@@ -74,10 +74,6 @@ struct con_sphere_rem {
 		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
 			  double a = norm((*it).position()-center);
 			  if (a < radius) {
-				  Point dir = (*it).position() - center;
-				  dir = dir/norm(dir);
-				  (*it).position() = center + radius*dir;
-				  (*it).value().vel = (*it).value().vel - dot((*it).value().vel,dir)*dir;
 			  }
 		  }
 		  (void)t;
