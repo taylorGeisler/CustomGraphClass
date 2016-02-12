@@ -4,9 +4,9 @@
 #
 
 # Executables to build
-EXEC += viewer
-EXEC += subgraph
-EXEC += shortest_path
+#EXEC += viewer
+#EXEC += subgraph
+#EXEC += shortest_path
 EXEC += mass_spring
 EXEC += test_nodes
 EXEC += test_edges

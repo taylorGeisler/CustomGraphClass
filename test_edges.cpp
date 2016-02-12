@@ -23,7 +23,7 @@ void sf_print(bool sf, std::string msg = "") {
 
 int main()
 {
-  using GraphType = Graph<int>;
+  using GraphType = Graph<int,double>;
   using Node = GraphType::node_type;
   using Edge = GraphType::edge_type;
 

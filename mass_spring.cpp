@@ -47,6 +47,7 @@ struct con_wall {
 				  (*it).value().vel[2] = 0;
 			  }
 		  }
+		  (void)t;
 	  }
 	  double zmax = -0.75;
 };
@@ -62,6 +63,7 @@ struct con_sphere {
 				  (*it).value().vel = (*it).value().vel - dot((*it).value().vel,dir)*dir;
 			  }
 		  }
+		  (void)t;
 	  }
 	  Point center = Point(0.5,0.5,-0.5);
 	  double radius = 0.15;
@@ -78,6 +80,7 @@ struct con_sphere_rem {
 				  (*it).value().vel = (*it).value().vel - dot((*it).value().vel,dir)*dir;
 			  }
 		  }
+		  (void)t;
 	  }
 	  Point center = Point(0.5,0.5,-0.5);
 	  double radius = 0.15;
@@ -137,11 +140,6 @@ double symp_euler_step(G& g, double t, double dt, F force) {
     // v^{n+1} = v^{n} + F(x^{n+1},t) * dt / m
     n.value().vel += force(n, t) * (dt / n.value().mass);
   }
-  
-  //CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
-  //ZZZ(g,t);
-
-
   return t + dt;
 }
 
@@ -185,6 +183,7 @@ struct GravityForce {
 		//Gravity Force
 		double m = n.value().mass;
 		return Point(0,0,-grav)*m;
+		(void)t;
 	}
 };
 
@@ -201,6 +200,7 @@ struct MassSpringForce {
 			Point F_unit_dir = ((*eit).node1().position() - (*eit).node2().position())/(*eit).length();
 			double F_mag = (*eit).value().K*((*eit).value().L_init-(*eit).length());
 			F += F_unit_dir*F_mag;
+			(void)t;
 		}
 		return F;
 	}
@@ -214,6 +214,7 @@ struct DampingForce {
   Point operator()(NODE n, double t) {
 		//Damping force
 		return n.value().vel*-c_;
+		(void)t;
 	}
 	
     double c_ = 1/100;

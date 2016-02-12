@@ -23,7 +23,7 @@ void sf_print(bool sf, std::string msg = "") {
 
 int main()
 {
-  using GraphType = Graph<int>;
+  using GraphType = Graph<int,double>;
   using Node = GraphType::node_type;
 
   GraphType g;
@@ -56,6 +56,11 @@ int main()
   for (int k = 0; k < 100; ++k)
     g.add_node(Point(CME212::random(), CME212::random(), CME212::random()), k);
   sf_print(g.num_nodes() == 100);
+  
+  //for (int i = 0; i < 100; ++i) {	  
+    //  std::cout<<g.node(i).value()<<std::endl;
+  //}
+  
   sf_print(g.node(0).value() == 0, "Node value set (0)");
   sf_print(g.node(99).value() == 99, "Node value set (99)");
 
