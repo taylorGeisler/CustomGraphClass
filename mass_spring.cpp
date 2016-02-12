@@ -39,8 +39,7 @@ typedef Graph<NodeData,EdgeData> GraphType;
 typedef typename GraphType::node_type Node;
 typedef typename GraphType::edge_type Edge;
 
-class con_wall {
-	public:
+struct con_wall {
 	  void operator() (GraphType& g, double t) {
 		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
 			  if (dot((*it).position(),Point(0,0,1)) < zmax) {
@@ -49,12 +48,58 @@ class con_wall {
 			  }
 		  }
 	  }
-	
-	private:
 	  double zmax = -0.75;
-	
 };
 
+struct con_sphere {
+	  void operator() (GraphType& g, double t) {
+		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
+			  double a = norm((*it).position()-center);
+			  if (a < radius) {
+				  Point dir = (*it).position() - center;
+				  dir = dir/norm(dir);
+				  (*it).position() = center + radius*dir;
+				  (*it).value().vel = (*it).value().vel - dot((*it).value().vel,dir)*dir;
+			  }
+		  }
+	  }
+	  Point center = Point(0.5,0.5,-0.5);
+	  double radius = 0.15;
+};
+
+struct con_sphere_rem {
+	  void operator() (GraphType& g, double t) {
+		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
+			  double a = norm((*it).position()-center);
+			  if (a < radius) {
+				  Point dir = (*it).position() - center;
+				  dir = dir/norm(dir);
+				  (*it).position() = center + radius*dir;
+				  (*it).value().vel = (*it).value().vel - dot((*it).value().vel,dir)*dir;
+			  }
+		  }
+	  }
+	  Point center = Point(0.5,0.5,-0.5);
+	  double radius = 0.15;
+};
+
+template <typename C1, typename C2>
+struct CombinedConstraint {
+	C1 c1;
+	C2 c2;
+	void operator()(GraphType& g, double t) {
+		c1(g,t);
+		c2(g,t);
+	}
+};
+
+template <typename C1, typename C2>
+CombinedConstraint<C1,C2> make_combined_constraint(C1 constraint1, C2 constraint2) {
+	CombinedConstraint<C1,C2> constraint;
+	constraint.c1 = constraint1;
+	constraint.c2 = constraint2;
+	return constraint;
+}
 
 /** Change a graph's nodes according to a step of the symplectic Euler
  *    method with the given node force.
@@ -81,7 +126,11 @@ double symp_euler_step(G& g, double t, double dt, F force) {
         n.position() += n.value().vel * dt;
 	}
   }
-
+  //con_sphere hi;
+  //hi(g,t);
+  CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
+  ZZZ(g, t);
+  
   // Compute the t+dt velocity
   for (auto it = g.node_begin(); it != g.node_end(); ++it) {
     auto n = *it;
@@ -89,8 +138,9 @@ double symp_euler_step(G& g, double t, double dt, F force) {
     n.value().vel += force(n, t) * (dt / n.value().mass);
   }
   
-  con_wall wall_constraint;
-  wall_constraint(g, t);
+  //CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
+  //ZZZ(g,t);
+
 
   return t + dt;
 }
@@ -162,10 +212,11 @@ struct DampingForce {
    */
   template <typename NODE>
   Point operator()(NODE n, double t) {
-	    double c = 0.0;
 		//Damping force
-		return n.value().vel*-c;
+		return n.value().vel*-c_;
 	}
+	
+    double c_ = 1/100;
 };
 
 
@@ -232,6 +283,8 @@ int main(int argc, char** argv) {
 
   for (double t = t_start; t < t_end; t += dt) {
     //std::cout << "t = " << t << std::endl;
+    //damp_force.c = 1/graph.size();
+    //symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce()));
     symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce(),DampingForce()));
     // Update viewer with nodes' new positions
     viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
@@ -242,6 +295,5 @@ int main(int argc, char** argv) {
     if (graph.size() < 100)
       CME212::sleep(0.001);
   }
-
   return 0;
 }
