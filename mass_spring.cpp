@@ -74,6 +74,7 @@ struct con_sphere_rem {
 		  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
 			  double a = norm((*it).position()-center);
 			  if (a < radius) {
+				  g.remove_node(*it);
 			  }
 		  }
 		  (void)t;
@@ -125,8 +126,6 @@ double symp_euler_step(G& g, double t, double dt, F force) {
         n.position() += n.value().vel * dt;
 	}
   }
-  //con_sphere hi;
-  //hi(g,t);
   CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
   ZZZ(g, t);
   
@@ -284,7 +283,11 @@ int main(int argc, char** argv) {
     //symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce()));
     symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce(),DampingForce()));
     // Update viewer with nodes' new positions
+    //viewer.clear();
+    //node_map.clear();
+    
     viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
+  //viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
     viewer.set_label(t);
 
     // These lines slow down the animation for small graphs, like grid0_*.
