@@ -20,6 +20,9 @@
 
 #include "Graph.hpp"
 
+#include <boost/numeric/mtl/mtl.hpp>
+#include <boost/numeric/itl/itl.hpp>
+
 
 // HW3: YOUR CODE HERE
 // Define a GraphSymmetricMatrix that maps
@@ -27,13 +30,94 @@
 // modify Graph at all!
 typedef Graph<char,char> GraphType;  //<  DUMMY Placeholder
 
+struct GraphSymmetricMatrix {
+	GraphSymmetricMatrix(const GraphType& g) : s_(g.size()), g_(&g) {
+	}
+	template <typename VectorIn , typename VectorOut , typename Assign > 
+    void mult(const VectorIn& v, VectorOut& w, Assign) const {
+		assert(size(v) == size(w));
+		assert(size(v) == s_);
+		
+		// Iterate over all nodes
+	    for (auto it = g_->node_begin(); it != g_->node_end(); ++it) { 
+			for (auto it1 = g_->node_begin(); it1 != g_->node_end(); ++it1) {
+				if (it == it1 and (*it).value() == 'b') {
+					Assign::apply(w[(*it).index()],v[(*it1).index()]);
+				}
+				else if (it != it1 and ((*it).value() == 'b' or (*it1).value() == 'b')) {
+					// Do nothing
+				}
+				else {
+					if (it == it1) {
+						Assign::apply(w[(*it).index()],-v[(*it1).index()]/(*it).degree());
+					}
+					else if (g_->has_edge(*it,*it1)) {
+						Assign::apply(w[(*it).index()],v[(*it1).index()]);
+					}
+					else {
+						// Do nothing
+					}
+					
+				}
+			}
+		}
+    }
+    
+    /** Matvec forwards to MTL’s lazy mat_cvec_multiplier operator */ 
+    template <typename Vector > 
+    mtl::vec::mat_cvec_multiplier<GraphSymmetricMatrix, Vector> 
+    operator*(const Vector& v) const {
+        return {*this, v};
+	}
+    
+    std::size_t s_;
+	
+	private:
+	const GraphType* g_;
+};
+
+inline std::size_t size(const GraphSymmetricMatrix& A) {
+	return A.s_*A.s_;
+}
+
+inline std::size_t num_rows(const GraphSymmetricMatrix& A) {
+	return A.s_;
+}
+
+inline std::size_t num_cols(const GraphSymmetricMatrix& A) {
+	return A.s_;
+}
+
+namespace mtl {
+namespace ashape {
+
+/** Define IdentityMatrix to be a non-scalar type. */
+template<>
+struct ashape_aux<GraphSymmetricMatrix> {
+	typedef nonscal type;
+};
+}    //end namespace ashape
+
+/** IdentityMatric implements the Collection concept
+ * with value_type and size_type */
+ template<>
+ struct Collection <GraphSymmetricMatrix> {
+	 typedef double value_type;
+	 typedef unsigned size_type;
+};
+}  // end namespace mtl
+
 /** Remove all the nodes in graph @a g whose posiiton is within Box3D @a bb.
  * @post For all i, 0 <= i < @a g.num_nodes(),
  *        not bb.contains(g.node(i).position())
  */
 void remove_box(GraphType& g, const Box3D& bb) {
   // HW3: YOUR CODE HERE
-  (void) g; (void) bb;   //< Quiet compiler
+  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
+	  if (bb.contains((*it).position())) {
+		  g.remove_node(it);
+	  }
+  }
   return;
 }
 
@@ -75,16 +159,57 @@ int main(int argc, char** argv)
   double h = norm((*it).node1().position() - (*it).node2().position());
 
   // Make holes in our Graph
-  remove_box(graph, Box3D(Point(-0.8+h,-0.8+h,-1), Point(-0.4-h,-0.4-h,1)));
-  remove_box(graph, Box3D(Point( 0.4+h,-0.8+h,-1), Point( 0.8-h,-0.4-h,1)));
-  remove_box(graph, Box3D(Point(-0.8+h, 0.4+h,-1), Point(-0.4-h, 0.8-h,1)));
-  remove_box(graph, Box3D(Point( 0.4+h, 0.4+h,-1), Point( 0.8-h, 0.8-h,1)));
-  remove_box(graph, Box3D(Point(-0.6+h,-0.2+h,-1), Point( 0.6-h, 0.2-h,1)));
+  //remove_box(graph, Box3D(Point(-0.8+h,-0.8+h,-1), Point(-0.4-h,-0.4-h,1)));
+  //remove_box(graph, Box3D(Point( 0.4+h,-0.8+h,-1), Point( 0.8-h,-0.4-h,1)));
+  //remove_box(graph, Box3D(Point(-0.8+h, 0.4+h,-1), Point(-0.4-h, 0.8-h,1)));
+  //remove_box(graph, Box3D(Point( 0.4+h, 0.4+h,-1), Point( 0.8-h, 0.8-h,1)));
+  //remove_box(graph, Box3D(Point(-0.6+h,-0.2+h,-1), Point( 0.6-h, 0.2-h,1)));
 
   // HW3: YOUR CODE HERE
   // Define b using the graph, f, and g.
   // Construct the GraphSymmetricMatrix A using the graph
   // Solve Au = b using MTL.
+  
+  // Mark Edges
+  for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
+	  if ((*it).degree() < 4) {
+		  (*it).value() = 'b';
+	  } else {
+		  (*it).value() = 'i';
+	  }
+  }
+  
+  // Make A
+  GraphSymmetricMatrix A(graph);
+  
+  // Make u
+  mtl::dense_vector<double> x(graph.size());
+  
+  // Make b
+  mtl::dense_vector<double> b(graph.size());
+  iota(b);
+  
+  // Preconditioner
+  itl::pc::identity<GraphSymmetricMatrix> P(A);
+  
+  // Iterator
+  // Termination criterion: r < 1e-6 * b or N iterations
+  itl::noisy_iteration<double> iter(b, 500, 1.e-6);
+  std::cout << x <<std::endl;
+  x = A * b;
+  std::cout << x <<std::endl;
+  // Solve for u
+  //itl::cg(A, x, b, P, iter);
+  
+  
+  CME212::SDLViewer viewer;
+  auto node_map = viewer.empty_node_map(graph);
+  viewer.launch();
+
+  viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
+  //viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
+
+  viewer.center_view();
 
   return 0;
 }
