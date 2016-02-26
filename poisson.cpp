@@ -144,6 +144,90 @@ double g_fun(const Point pnt) {
     return 0;
 }
 
+/// Class for iteration control that cyclically prints residual
+  template <class Real, class OStream = std::ostream>
+  class visual_iteration : public itl::basic_iteration<Real> 
+  {
+      typedef itl::basic_iteration<Real> super;
+      typedef visual_iteration self;
+
+      void print_resid()
+      {
+	  if (!this->my_quite && this->i % cycle == 0)
+	      if (multi_print || this->i != last_print) { // Avoid multiple print-outs in same iteration
+		  out << "iteration " << this->i << ": resid " << this->resid() 
+		      // << " / " << this->norm_r0 << " = " << this->resid() / this->norm_r0 << " (rel. error)"
+		      << std::endl;
+		  last_print= this->i;
+		  
+		  //for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
+	          //(*it).value().v_ = x[(*it).index()];
+          //}
+  
+		  //CME212::SDLViewer viewer;
+		  //auto node_map = viewer.empty_node_map(graph);
+		  
+		  //viewer.clear();
+		  //viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
+		  //viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
+		
+		  //viewer.center_view();
+	      }
+      }
+
+    public:
+  
+      template <class Vector>
+      visual_iteration(const Vector& r0, int max_iter_, Real tol_, Real atol_ = Real(0), int cycle_ = 100,
+		       OStream& out = std::cout)
+	: super(r0, max_iter_, tol_, atol_), cycle(cycle_), last_print(-1), multi_print(false), out(out)
+      {}
+
+      visual_iteration(Real r0, int max_iter_, Real tol_, Real atol_ = Real(0), int cycle_ = 100,
+		       OStream& out = std::cout)
+	: super(r0, max_iter_, tol_, atol_), cycle(cycle_), last_print(-1), multi_print(false), out(out)
+      {}
+      
+
+      bool finished() { return super::finished(); }
+
+      template <typename T>
+      bool finished(const T& r) 
+      {
+	  bool ret= super::finished(r);
+	  print_resid();
+	  return ret;
+      }
+
+      inline self& operator++() { ++this->i; return *this; }
+      
+      inline self& operator+=(int n) { this->i+= n; return *this; }
+
+      operator int() const { return error_code(); }
+
+      /// Whether the residual is printed multiple times in iteration
+      bool is_multi_print() const { return multi_print; }
+
+      /// Set whether the residual is printed multiple times in iteration
+      void set_multi_print(bool m) { multi_print= m; }
+
+      int error_code() const 
+      {
+	  if (!this->my_suppress)
+	      out << "finished! error code = " << this->error << '\n'
+		  << this->iterations() << " iterations\n"
+		  << this->resid() << " is actual final residual. \n"
+		  << this->relresid() << " is actual relative tolerance achieved. \n"
+		  << "Relative tol: " << this->rtol_ << "  Absolute tol: " << this->atol_ << '\n'
+		  << "Convergence:  " << pow(this->relresid(), 1.0 / double(this->iterations())) << std::endl;
+	  return this->error;
+      }
+    protected:
+      int        cycle, last_print;
+      bool       multi_print;
+      OStream&   out;
+  };
+
 
 int main(int argc, char** argv)
 {
@@ -235,8 +319,9 @@ int main(int argc, char** argv)
   
   // Iterator
   // Termination criterion: r < 1e-6 * b or N iterations
-  itl::cyclic_iteration<double> iter(b, 500, 1.e-10, 0, 50);
-    
+  //itl::cyclic_iteration<double> iter(b, 500, 1.e-10, 0, 50);
+  visual_iteration<double> iter(b, 500, 1.e-10, 0, 50);
+  
   // Solve for x
   itl::cg(A, x, b, P, iter);
   
