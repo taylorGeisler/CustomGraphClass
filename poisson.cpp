@@ -28,7 +28,13 @@
 // Define a GraphSymmetricMatrix that maps
 // your Graph concept to MTL's Matrix concept. This shouldn't need to copy or
 // modify Graph at all!
-typedef Graph<char,char> GraphType;  //<  DUMMY Placeholder
+
+struct GraphValue {
+	bool b_;
+	double v_;
+};
+
+typedef Graph<GraphValue,char> GraphType;
 
 struct GraphSymmetricMatrix {
 	GraphSymmetricMatrix(const GraphType& g) : s_(g.size()), g_(&g) {
@@ -41,10 +47,10 @@ struct GraphSymmetricMatrix {
 		// Iterate over all nodes
 	    for (auto it = g_->node_begin(); it != g_->node_end(); ++it) { 
 			for (auto it1 = g_->node_begin(); it1 != g_->node_end(); ++it1) {
-				if (it == it1 and (*it).value() == 'b') {
+				if (it == it1 and (*it).value().b_) {
 					Assign::apply(w[(*it).index()],v[(*it1).index()]);
 				}
-				else if (it != it1 and ((*it).value() == 'b' or (*it1).value() == 'b')) {
+				else if (it != it1 and ((*it).value().b_ or (*it1).value().b_)) {
 					// Do nothing
 				}
 				else {
@@ -57,7 +63,6 @@ struct GraphSymmetricMatrix {
 					else {
 						// Do nothing
 					}
-					
 				}
 			}
 		}
@@ -121,6 +126,28 @@ void remove_box(GraphType& g, const Box3D& bb) {
   return;
 }
 
+double forcing_fun(const Point pnt) {
+	  return 5*cos(norm_1(pnt));
+}
+
+double g_fun(const Point pnt) {
+	
+	//CME212::BoundingBox bb = Box3D(Point(-0.6,-0.2,-1), Point(0.6,0.2,1));
+	
+	if (norm_inf(pnt) == 1) {
+		return 0;
+	}
+	else if (norm_inf(pnt - Point(0.6, 0.6, 0)) < 0.2 or norm_inf(pnt - Point(-0.6, -0.6, 0)) < 0.2 
+	  or norm_inf(pnt - Point(-0.6, 0.6, 0)) < 0.2 or norm_inf(pnt - Point(0.6, -0.6, 0)) < 0.2) {
+        return -0.2;
+	}
+	else if (Box3D(Point(-0.6,-0.2,-1), Point(0.6,0.2,1)).contains(pnt)) {
+	  return 1;
+    }
+    
+    return 0;
+    
+}
 
 
 int main(int argc, char** argv)
@@ -173,9 +200,9 @@ int main(int argc, char** argv)
   // Mark Edges
   for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
 	  if ((*it).degree() < 4) {
-		  (*it).value() = 'b';
+		  (*it).value().v_ = true;
 	  } else {
-		  (*it).value() = 'i';
+		  (*it).value().v_ = false;
 	  }
   }
   
@@ -186,8 +213,15 @@ int main(int argc, char** argv)
   mtl::dense_vector<double> x(graph.size());
   
   // Make b
+  
+  
   mtl::dense_vector<double> b(graph.size());
-  iota(b);
+  for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
+	  if ((*it).value().b_) {
+		  
+	  } else {
+	  }
+  }
   
   // Preconditioner
   itl::pc::identity<GraphSymmetricMatrix> P(A);
@@ -195,11 +229,9 @@ int main(int argc, char** argv)
   // Iterator
   // Termination criterion: r < 1e-6 * b or N iterations
   itl::noisy_iteration<double> iter(b, 500, 1.e-6);
-  std::cout << x <<std::endl;
-  x = A * b;
-  std::cout << x <<std::endl;
+  
   // Solve for u
-  //itl::cg(A, x, b, P, iter);
+  itl::cg(A, x, b, P, iter);
   
   
   CME212::SDLViewer viewer;

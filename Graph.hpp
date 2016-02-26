@@ -81,7 +81,7 @@
 
   /** Construct an empty graph. */
   Graph()
-   : g_nodes(), g_edges(), g_evalues(), g_values(), g_idx2uid() {
+   : g_nodes(), g_edges(), g_evalues(), g_values(), g_indices(), g_idx2uid(){
 	   g_num_nodes = 0;
 	   g_num_edges = 0;
   }
@@ -509,6 +509,7 @@
     g_edges.clear();
     g_evalues.clear();
     g_values.clear();
+    g_indices.clear();
     g_idx2uid.clear();
     g_num_nodes = 0;
     g_num_edges = 0;
@@ -748,6 +749,7 @@
   std::vector<std::vector<index_type>> g_edges;
   std::vector<std::vector<edge_value_type>> g_evalues;
   std::vector<node_value_type> g_values;
+  std::vector<size_type> g_indices;
   size_type g_num_nodes;
   size_type g_num_edges;
   std::vector<uid_type> g_idx2uid;
