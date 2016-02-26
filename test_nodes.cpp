@@ -51,15 +51,12 @@ int main()
   sf_print(g.num_nodes() == 0, "Removing Node...");
 
   sf_print(g.num_nodes() == 0, "Graph has 0 Nodes");
-
+  
   std::cerr << "Adding 100 Nodes...";
   for (int k = 0; k < 100; ++k)
     g.add_node(Point(CME212::random(), CME212::random(), CME212::random()), k);
   sf_print(g.num_nodes() == 100);
   
-  //for (int i = 0; i < 100; ++i) {	  
-    //  std::cout<<g.node(i).value()<<std::endl;
-  //}
   
   sf_print(g.node(0).value() == 0, "Node value set (0)");
   sf_print(g.node(99).value() == 99, "Node value set (99)");
@@ -71,7 +68,6 @@ int main()
   }
 
   sf_print(g.num_nodes() == 50, "Removed 50 nodes");
-
   std::cerr << "Checking Node indices...";
   bool succ = true;
   for (unsigned k = 0; succ && k < 50; ++k) {

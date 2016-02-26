@@ -123,18 +123,16 @@
 
     /** Return this node's position. */
     const Point& position() const {
-	  uid_type uid = n_graph->g_idx2uid[n_index];
-      return n_graph->g_nodes[uid];
+      return n_graph->g_nodes[n_id];
     }
     
     Point& position() {
-		uid_type uid = n_graph->g_idx2uid[n_index];
-		return n_graph->g_nodes[uid];
+		return n_graph->g_nodes[n_id];
 	}
 
     /** Return this node's index, a number in the range [0, graph_size). */
     size_type index() const {
-      return n_index;
+      return n_graph->g_indices[n_id];
     }
 
     /** Test whether this node and @a n are equal.
@@ -142,7 +140,7 @@
      * Equal nodes have the same graph and the same index.
      */
     bool operator==(const Node& n) const {
-      if (n_index == n.n_index && n_graph == n.n_graph){
+      if (n_id == n.n_id && n_graph == n.n_graph){
 		  return true;
       }
       return false;
@@ -159,7 +157,7 @@
      * then by index if nodes of same graph
      */
     bool operator<(const Node& n) const {
-      if ((n_graph <n.n_graph) or (n_graph == n.n_graph and n_index < n.n_index)){
+      if ((n_graph <n.n_graph) or (n_graph == n.n_graph and n_id < n.n_id)){
 		  return true;
 	  }
 	  return false;
@@ -167,22 +165,17 @@
     
     /** Return the value stored in this node. */
     node_value_type& value() {
-		//std::cout <<"INDEX " << n_index <<std::endl;
-		uid_type uid = n_graph->g_idx2uid[n_index];
-		//std::cout<<"Returning Value "<<uid<<std::endl;
-		return const_cast<graph_type*>(n_graph)->g_values[uid];
+		return const_cast<graph_type*>(n_graph)->g_values[n_id];
 	}
 	
 	/** Return the value stored in this node */
 	const node_value_type& value() const {
-		uid_type uid = n_graph->g_idx2uid[n_index];
-		return n_graph->g_values[uid];
+		return n_graph->g_values[n_id];
 	}
 	
 	/** Return the degree of this node (number of edges) */
 	size_type degree() const {
-		uid_type uid = n_graph->g_idx2uid[n_index];
-		return n_graph->connectivity(uid);
+		return n_graph->connectivity(n_id);
 	}
 	
 	/** Return a begin iterator that iterates over edges of node */
@@ -200,7 +193,7 @@
     friend class Graph;
 	
     graph_type* n_graph = nullptr;
-    index_type n_index;
+    uid_type n_id;
     
     /** Construct a valid Node object
      * 
@@ -208,7 +201,7 @@
      * 
      */
     Node(const graph_type* node_graph, index_type node_index) {
-		n_index = node_index;
+		n_id = node_graph->g_idx2uid[node_index];
 		n_graph = const_cast<graph_type*>(node_graph);	
 	}
     
@@ -245,13 +238,7 @@
 		g_evalues[i].resize(g_num_nodes);
 	}
 	g_idx2uid.push_back(g_nodes.size()-1);
-	//std::cout << "$$$$$$$$$$$$$$$$$$$$$$" <<std::endl;
-	//for (int i = 0; i < g_idx2uid.size(); ++i) {
-	//std::cout << "$$ " << g_idx2uid[i] <<std::endl;
-    //}
-    //std::cout<<"yo" << node(0).value()<<std::endl;
-    //std::cout<<g_idx2uid[0]<<std::endl;
-    //std::cout<<g_values[1]<<std::endl;
+	g_indices.push_back(g_num_nodes-1);
     return Node(this, g_idx2uid.size()-1);
   }
 
@@ -286,18 +273,25 @@
 			  ++k;
 		  }
 	  }
+	  uid_type id = g_idx2uid[n.index()];
+	  
 	  g_idx2uid.erase(g_idx2uid.begin() + n.index());
 	  --g_num_nodes;
+	  
+	  for (uid_type i = id; i != g_indices.size(); ++i) {
+		  --g_indices[i];
+	  }
+		  
 	  //remove edges
 	  return 1;
   }
   
-  node_iterator remove_node(node_iterator n_it) {
-       g_idx2uid.erase(g_idx2uid.begin() + (*n_it).index());
-	  --g_num_nodes;
-	  //remove edges
-	  return n_it;
-  }
+  //node_iterator remove_node(node_iterator n_it) {
+       //g_idx2uid.erase(g_idx2uid.begin() + (*n_it).index());
+	  //--g_num_nodes;
+	  ////remove edges
+	  //return n_it;
+  //}
 
   //
   // EDGES
@@ -317,12 +311,12 @@
 
     /** Return a node of this Edge */
     Node node1() const {
-      return Node(e_graph,e_node1);
+      return Node(e_graph,e_graph->g_indices[e_id_node1]);
     }
 
     /** Return the other node of this Edge */
     Node node2() const {
-      return Node(e_graph,e_node2);
+      return Node(e_graph,e_graph->g_indices[e_id_node2]);
     }
 
     /** Test whether this edge and @a e are equal.
@@ -330,8 +324,8 @@
      * Equal edges represent the same undirected edge between two nodes.
      */
     bool operator==(const Edge& e) const {
-	    if (e_graph == e.e_graph and ((e_node1 == e.e_node1 and 
-	    e_node2 == e.e_node2) or (e_node1 == e.e_node2 and e_node2 == e.e_node1))){
+	    if (e_graph == e.e_graph and ((e_id_node1 == e.e_id_node1 and 
+	    e_id_node2 == e.e_id_node2) or (e_id_node1 == e.e_id_node2 and e_id_node2 == e.e_id_node1))){
 			return true;
 	    }
       return false;
@@ -350,12 +344,12 @@
     }
     
     double length() const {
-		return norm(e_graph->node(e_node1).position()-e_graph->node(e_node2).position());
+		return norm(e_graph->node(g_indices[e_id_node1]).position()-e_graph->node(g_indices[e_id_node2]).position());
 	}
 	
 	edge_value_type& value() {
-		index_type i_min = std::min(e_node1,e_node2);
-		index_type i_max = std::max(e_node1,e_node2);
+		index_type i_min = std::min(e_id_node1,e_id_node2);
+		index_type i_max = std::max(e_id_node1,e_id_node2);
 		return const_cast<graph_type*>(e_graph)->g_evalues[i_min][i_max];
 	}
 
@@ -363,17 +357,17 @@
     // Allow Graph to access Edge's private member data and functions.
     friend class Graph;
     graph_type* e_graph = nullptr;
-    index_type e_node1, e_node2;
+    uid_type e_id_node1, e_id_node2;
     
     /** Construct a valid Edge object
      * 
      * @return edge object with given graph and nodes
      * 
      */
-    Edge(const graph_type* edge_graph, index_type edge_node1, index_type edge_node2) {
+    Edge(const graph_type* edge_graph, index_type e_idx_node1, index_type e_idx_node2) {
 		e_graph = const_cast<graph_type*>(edge_graph);
-		e_node1 = edge_node1;
-		e_node2 = edge_node2;
+		e_id_node1 = e_graph->g_idx2uid[e_idx_node1];
+		e_id_node2 = e_graph->g_idx2uid[e_idx_node2];
 	}
   };
 
@@ -392,6 +386,9 @@
    */
   Edge edge(index_type i) const {
     auto ei = edge_begin();
+    if (i == 0) {
+		return *ei;
+	}
     for (index_type j = 0; j < i; ++j) {
 		++ei;
 	}
@@ -405,9 +402,9 @@
    * Complexity: No more than O(num_nodes() + num_edges()), hopefully less
    */
   bool has_edge(const Node& a, const Node& b) const {
-	  if (g_edges[a.index()].size() != 0) { 
-	      for (index_type i = 0; i < g_edges[a.index()].size(); ++i) {
-		      if (g_edges[a.index()][i] == b.index()) {
+	  if (g_edges[g_idx2uid[a.index()]].size() != 0) { 
+	      for (uid_type i = 0; i < g_edges[g_idx2uid[a.index()]].size(); ++i) {
+		      if (g_edges[g_idx2uid[a.index()]][i] == g_idx2uid[b.index()]) {
 		          return true;
 		      }
 	      }
@@ -430,9 +427,9 @@
   Edge add_edge(const Node& a, const Node& b, const edge_value_type& v = edge_value_type()) {
     edge_type new_edge = Edge(this, a.index(), b.index());
     if (!has_edge(a, b)) {
-	    g_edges[a.index()].push_back(b.index());
-	    g_edges[b.index()].push_back(a.index());
-	    g_evalues[std::min(a.index(),b.index())][std::max(a.index(),b.index())] = v;
+	    g_edges[g_idx2uid[a.index()]].push_back(g_idx2uid[b.index()]);
+	    g_edges[g_idx2uid[b.index()]].push_back(g_idx2uid[a.index()]);
+	    g_evalues[std::min(g_idx2uid[a.index()],g_idx2uid[b.index()])][std::max(g_idx2uid[a.index()],g_idx2uid[b.index()])] = v;
 	    ++g_num_edges;
 	}
     return new_edge;
@@ -440,16 +437,16 @@
   
   size_type remove_edge(const Node& n1, const Node& n2) {
 	  if (has_edge(n1,n2)) {
-		  index_type i1 = n1.index();
-		  index_type i2 = n2.index();
-		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
-			  if (g_edges[i1][k] == i2) {
-				  g_edges[i1].erase(g_edges[i1].begin() + k);
+		  uid_type id1 = g_idx2uid[n1.index()];
+		  uid_type id2 = g_idx2uid[n2.index()];
+		  for (uid_type k = 0; k < g_edges[id1].size(); ++k) {
+			  if (g_edges[id1][k] == id2) {
+				  g_edges[id1].erase(g_edges[id1].begin() + k);
 			  }
 		  }
-		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
-			  if (g_edges[i2][k] == i1) {
-				  g_edges[i2].erase(g_edges[i2].begin() + k);
+		  for (index_type k = 0; k < g_edges[id2].size(); ++k) {
+			  if (g_edges[id2][k] == id1) {
+				  g_edges[id2].erase(g_edges[id2].begin() + k);
 			  }
 		  }
 		  --g_num_edges;
@@ -459,17 +456,16 @@
   
   size_type remove_edge(const Edge& e) {
 	  if (has_edge(e.node1(),e.node2())) {
-		  index_type i1 = e.node1().index();
-		  index_type i2 = e.node2().index();
-		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
-			  if (g_edges[i1][k] == i2) {
-				  g_edges[i1].erase(g_edges[i1].begin() + k);
+		  uid_type id1 = g_idx2uid[e.node1().index()];
+		  uid_type id2 = g_idx2uid[e.node2().index()];
+		  for (uid_type k = 0; k < g_edges[id1].size(); ++k) {
+			  if (g_edges[id1][k] == id2) {
+				  g_edges[id1].erase(g_edges[id1].begin() + k);
 			  }
 		  }
-		  
-		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
-			  if (g_edges[i2][k] == i1) {
-				  g_edges[i2].erase(g_edges[i2].begin() + k);
+		  for (index_type k = 0; k < g_edges[id2].size(); ++k) {
+			  if (g_edges[id2][k] == id1) {
+				  g_edges[id2].erase(g_edges[id2].begin() + k);
 			  }
 		  }
 		  --g_num_edges;
@@ -480,17 +476,16 @@
   edge_iterator remove_edge(edge_iterator e_it) {
 	  edge_type e = (*e_it);
 	  if (has_edge(e.node1(),e.node2())) {
-		  index_type i1 = e.node1().index();
-		  index_type i2 = e.node2().index();
-		  for (index_type k = 0; k < g_edges[i1].size(); ++k) {
-			  if (g_edges[i1][k] == i2) {
-				  g_edges[i1].erase(g_edges[i1].begin() + k);
+		  uid_type id1 = g_idx2uid[e.node1().index()];
+		  uid_type id2 = g_idx2uid[e.node2().index()];
+		  for (uid_type k = 0; k < g_edges[id1].size(); ++k) {
+			  if (g_edges[id1][k] == id2) {
+				  g_edges[id1].erase(g_edges[id1].begin() + k);
 			  }
 		  }
-		  
-		  for (index_type k = 0; k < g_edges[i2].size(); ++k) {
-			  if (g_edges[i2][k] == i1) {
-				  g_edges[i2].erase(g_edges[i2].begin() + k);
+		  for (index_type k = 0; k < g_edges[id2].size(); ++k) {
+			  if (g_edges[id2][k] == id1) {
+				  g_edges[id2].erase(g_edges[id2].begin() + k);
 			  }
 		  }
 		  --g_num_edges;
@@ -607,6 +602,7 @@
     
     /** Return edge of current edge iterator */
     Edge operator*() const {
+		
 	    return Edge(ei_graph, ei_node1_i, ei_graph->index_node2(*this));
 	}
 	
@@ -618,7 +614,7 @@
 			    ei_node2_p = 0;
 			    do {
 				    ++ei_node1_i;
-				    if (ei_node1_i == ei_graph->graph_size()) {
+				    if (ei_node1_i == ei_graph->size()) {
 						return *this;
 					}
 			    } while (ei_graph->connectivity(*this) == 0);
@@ -650,11 +646,11 @@
   
   /** Return begin edge iterator of current graph */
   edge_iterator edge_begin() const {
-	  index_type i = 0;
-	  while (g_edges[i].size() == 0) {
-		  ++i;
+	  uid_type id = 0;
+	  while (g_edges[id].size() == 0) {
+		  ++id;
 	  }
-	  return edge_iterator(this,i,0);
+	  return edge_iterator(this,g_indices[id],0);
   }
   
   /** Return end edge iterator of current graph */
@@ -664,7 +660,7 @@
   
   /** Return index of node two of current edge */
   index_type index_node2(const edge_iterator& eit) const {
-	  return g_edges[eit.ei_node1_i][eit.ei_node2_p];
+	  return g_edges[g_idx2uid[eit.ei_node1_i]][eit.ei_node2_p];
   }
   
   /** Return index of node two of current edge */
@@ -678,14 +674,14 @@
   }
   
   /** Return connectivity of node n */
-  size_type connectivity(const index_type n) const {
+  size_type connectivity(const uid_type n) const {
 	  return g_edges[n].size();
   }
   
-  /** Return total number of nodes of graph */
-  size_type graph_size() {
-	  return g_num_nodes;
-  }
+  ///** Return total number of nodes of graph */
+  //size_type graph_size() {
+	  //return g_num_nodes;
+  //}
 
   //
   // Incident Iterator
@@ -736,7 +732,7 @@
     index_type iit_node;
     index_type iit_edge_p;
     
-    IncidentIterator(const graph_type* current_graph, const Node& n, size_type edge_p) {
+    IncidentIterator(const graph_type* current_graph, const Node& n, index_type edge_p) {
 		iit_graph = const_cast<graph_type*>(current_graph);
 		iit_node = n.index();
 		iit_edge_p = edge_p;
