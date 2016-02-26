@@ -45,27 +45,37 @@ struct GraphSymmetricMatrix {
 		assert(size(v) == s_);
 		
 		// Iterate over all nodes
+		int count = 0;
 	    for (auto it = g_->node_begin(); it != g_->node_end(); ++it) { 
+			double store = 0;
 			for (auto it1 = g_->node_begin(); it1 != g_->node_end(); ++it1) {
 				if (it == it1 and (*it).value().b_) {
-					Assign::apply(w[(*it).index()],v[(*it1).index()]);
+					//Assign::apply(w[(*it).index()],v[(*it1).index()]);
+					//w[(*it).index()] += v[(*it1).index()];
+					store += v[(*it1).index()];
 				}
 				else if (it != it1 and ((*it).value().b_ or (*it1).value().b_)) {
 					// Do nothing
 				}
 				else {
 					if (it == it1) {
-						Assign::apply(w[(*it).index()],-v[(*it1).index()]/(*it).degree());
+						//Assign::apply(w[(*it).index()],-v[(*it1).index()]*(*it).degree());
+						//w[(*it).index()] -= v[(*it1).index()]*double((*it).degree());
+						store -= v[(*it1).index()]*double((*it).degree());
 					}
 					else if (g_->has_edge(*it,*it1)) {
-						Assign::apply(w[(*it).index()],v[(*it1).index()]);
+						//Assign::apply(w[(*it).index()],v[(*it1).index()]);
+						//w[(*it).index()] += v[(*it1).index()];
+						store += v[(*it1).index()];
 					}
 					else {
 						// Do nothing
 					}
 				}
 			}
+			Assign::apply(w[(*it).index()],store);
 		}
+		std::cout << count << std::endl;
     }
     
     /** Matvec forwards to MTL’s lazy mat_cvec_multiplier operator */ 
@@ -126,15 +136,12 @@ void remove_box(GraphType& g, const Box3D& bb) {
   return;
 }
 
-double forcing_fun(const Point pnt) {
+double f_fun(const Point pnt) {
 	  return 5*cos(norm_1(pnt));
 }
 
 double g_fun(const Point pnt) {
-	
-	//CME212::BoundingBox bb = Box3D(Point(-0.6,-0.2,-1), Point(0.6,0.2,1));
-	
-	if (norm_inf(pnt) == 1) {
+	if (norm_inf(pnt) == 1.0) {
 		return 0;
 	}
 	else if (norm_inf(pnt - Point(0.6, 0.6, 0)) < 0.2 or norm_inf(pnt - Point(-0.6, -0.6, 0)) < 0.2 
@@ -144,9 +151,7 @@ double g_fun(const Point pnt) {
 	else if (Box3D(Point(-0.6,-0.2,-1), Point(0.6,0.2,1)).contains(pnt)) {
 	  return 1;
     }
-    
     return 0;
-    
 }
 
 
@@ -186,11 +191,11 @@ int main(int argc, char** argv)
   double h = norm((*it).node1().position() - (*it).node2().position());
 
   // Make holes in our Graph
-  //remove_box(graph, Box3D(Point(-0.8+h,-0.8+h,-1), Point(-0.4-h,-0.4-h,1)));
-  //remove_box(graph, Box3D(Point( 0.4+h,-0.8+h,-1), Point( 0.8-h,-0.4-h,1)));
-  //remove_box(graph, Box3D(Point(-0.8+h, 0.4+h,-1), Point(-0.4-h, 0.8-h,1)));
-  //remove_box(graph, Box3D(Point( 0.4+h, 0.4+h,-1), Point( 0.8-h, 0.8-h,1)));
-  //remove_box(graph, Box3D(Point(-0.6+h,-0.2+h,-1), Point( 0.6-h, 0.2-h,1)));
+  remove_box(graph, Box3D(Point(-0.8+h,-0.8+h,-1), Point(-0.4-h,-0.4-h,1)));
+  remove_box(graph, Box3D(Point( 0.4+h,-0.8+h,-1), Point( 0.8-h,-0.4-h,1)));
+  remove_box(graph, Box3D(Point(-0.8+h, 0.4+h,-1), Point(-0.4-h, 0.8-h,1)));
+  remove_box(graph, Box3D(Point( 0.4+h, 0.4+h,-1), Point( 0.8-h, 0.8-h,1)));
+  remove_box(graph, Box3D(Point(-0.6+h,-0.2+h,-1), Point( 0.6-h, 0.2-h,1)));
 
   // HW3: YOUR CODE HERE
   // Define b using the graph, f, and g.
@@ -199,38 +204,50 @@ int main(int argc, char** argv)
   
   // Mark Edges
   for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
-	  if ((*it).degree() < 4) {
-		  (*it).value().v_ = true;
+	  if ((*it).degree() != 4) {
+		  (*it).value().b_ = true;
+	  } else if (Box3D(Point(-0.8,-0.8,-1), Point(-0.4,-0.4,1)).contains((*it).position()) or
+	      Box3D(Point(0.4,-0.8,-1), Point(0.8,-0.4,1)).contains((*it).position()) or
+	      Box3D(Point(-0.8,0.4,-1), Point(-0.4,0.8,1)).contains((*it).position()) or
+	      Box3D(Point(0.4,0.4,-1), Point(0.8,0.8,1)).contains((*it).position()) or
+	      Box3D(Point(-0.6,-0.2,-1), Point(0.6,0.2,1)).contains((*it).position())) {
+			  (*it).value().b_ = true;
 	  } else {
-		  (*it).value().v_ = false;
+		  (*it).value().b_ = false;
 	  }
   }
   
   // Make A
   GraphSymmetricMatrix A(graph);
   
-  // Make u
+  // Make x
   mtl::dense_vector<double> x(graph.size());
+  for (auto it = x.begin(); it != x.end(); ++it)
+      *it = 0;
   
   // Make b
-  
-  
   mtl::dense_vector<double> b(graph.size());
+  for (auto it = b.begin(); it != b.end(); ++it)
+      *it = 0;
   for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
 	  if ((*it).value().b_) {
-		  
+		 b[(*it).index()] = g_fun((*it).position());
 	  } else {
+		  b[(*it).index()] = h*h*f_fun((*it).position());
+		  for (auto iit = (*it).edge_begin(); iit != (*it).edge_end(); ++iit) {
+			  b[(*it).index()] -= g_fun((*iit).node2().position());
+		  }
 	  }
   }
-  
+
   // Preconditioner
   itl::pc::identity<GraphSymmetricMatrix> P(A);
   
   // Iterator
   // Termination criterion: r < 1e-6 * b or N iterations
-  itl::noisy_iteration<double> iter(b, 500, 1.e-6);
-  
-  // Solve for u
+  itl::noisy_iteration<double> iter(b, 500, 1.e-10);
+    
+  // Solve for x
   itl::cg(A, x, b, P, iter);
   
   
@@ -239,7 +256,7 @@ int main(int argc, char** argv)
   viewer.launch();
 
   viewer.add_nodes(graph.node_begin(), graph.node_end(), node_map);
-  //viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
+  viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);
 
   viewer.center_view();
 

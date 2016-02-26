@@ -125,6 +125,8 @@ int main()
         ++count_edges;
     }
   }
+  std::cout << "Edge Count " << g.num_edges() <<std::endl;
+  std::cout << count_edges <<std::endl;
   sf_print(count_edges == g.num_edges(), "Edge count agrees");
 
   // Remove 50 Nodes...
