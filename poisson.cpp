@@ -45,37 +45,27 @@ struct GraphSymmetricMatrix {
 		assert(size(v) == s_);
 		
 		// Iterate over all nodes
-		int count = 0;
 	    for (auto it = g_->node_begin(); it != g_->node_end(); ++it) { 
 			double store = 0;
 			for (auto it1 = g_->node_begin(); it1 != g_->node_end(); ++it1) {
 				if (it == it1 and (*it).value().b_) {
-					//Assign::apply(w[(*it).index()],v[(*it1).index()]);
-					//w[(*it).index()] += v[(*it1).index()];
 					store += v[(*it1).index()];
 				}
 				else if (it != it1 and ((*it).value().b_ or (*it1).value().b_)) {
-					// Do nothing
 				}
 				else {
 					if (it == it1) {
-						//Assign::apply(w[(*it).index()],-v[(*it1).index()]*(*it).degree());
-						//w[(*it).index()] -= v[(*it1).index()]*double((*it).degree());
 						store -= v[(*it1).index()]*double((*it).degree());
 					}
 					else if (g_->has_edge(*it,*it1)) {
-						//Assign::apply(w[(*it).index()],v[(*it1).index()]);
-						//w[(*it).index()] += v[(*it1).index()];
 						store += v[(*it1).index()];
 					}
 					else {
-						// Do nothing
 					}
 				}
 			}
 			Assign::apply(w[(*it).index()],store);
 		}
-		std::cout << count << std::endl;
     }
     
     /** Matvec forwards to MTL’s lazy mat_cvec_multiplier operator */ 
@@ -245,11 +235,14 @@ int main(int argc, char** argv)
   
   // Iterator
   // Termination criterion: r < 1e-6 * b or N iterations
-  itl::noisy_iteration<double> iter(b, 500, 1.e-10);
+  itl::cyclic_iteration<double> iter(b, 500, 1.e-10, 0, 50);
     
   // Solve for x
   itl::cg(A, x, b, P, iter);
   
+   for (auto it = graph.node_begin(); it != graph.node_end(); ++it) {
+	  (*it).value().v_ = x[(*it).index()];
+  }
   
   CME212::SDLViewer viewer;
   auto node_map = viewer.empty_node_map(graph);

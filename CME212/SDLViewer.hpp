@@ -48,11 +48,30 @@ struct DefaultColor {
   }
 };
 
+struct NodeColor {
+  template <typename NODE>
+  Color operator()(const NODE& node) {
+    float c = ((float)node.value().v_+0.2)/1.2;
+    if (c < 0.0) { c = 0; }
+    return CME212::Color::make_heat(c);
+  }
+};
+
 // A default position functor that returns node.position() for any node
 struct DefaultPosition {
   template <typename NODE>
   Point operator()(const NODE& node) {
     return node.position();
+  }
+};
+
+// A default position functor that returns node.position() for any node
+struct NodePosition {
+  template <typename NODE>
+  Point operator()(const NODE& node) {
+	Point p = node.position();
+	p[2] = node.value().v_;
+    return p;
   }
 };
 
@@ -276,7 +295,7 @@ class SDLViewer {
   template <typename InputIterator, typename Map>
   void add_nodes(InputIterator first, InputIterator last,
                  Map& node_map) {
-    return add_nodes(first, last, DefaultColor(), DefaultPosition(), node_map);
+    return add_nodes(first, last, NodeColor(), NodePosition(), node_map);
   }
 
   /** Add the nodes in the range [first, last) to the display.
@@ -290,7 +309,7 @@ class SDLViewer {
   template <typename InputIterator, typename ColorFn, typename Map>
   void add_nodes(InputIterator first, InputIterator last,
                  ColorFn color_function, Map& node_map) {
-    return add_nodes(first, last, color_function, DefaultPosition(), node_map);
+    return add_nodes(first, last, color_function, NodePosition(), node_map);
   }
 
   /** Add the nodes in the range [first, last) to the display.
