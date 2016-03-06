@@ -295,7 +295,7 @@ class SDLViewer {
   template <typename InputIterator, typename Map>
   void add_nodes(InputIterator first, InputIterator last,
                  Map& node_map) {
-    return add_nodes(first, last, NodeColor(), NodePosition(), node_map);
+    return add_nodes(first, last, DefaultColor(), DefaultPosition(), node_map);
   }
 
   /** Add the nodes in the range [first, last) to the display.
@@ -309,7 +309,7 @@ class SDLViewer {
   template <typename InputIterator, typename ColorFn, typename Map>
   void add_nodes(InputIterator first, InputIterator last,
                  ColorFn color_function, Map& node_map) {
-    return add_nodes(first, last, color_function, NodePosition(), node_map);
+    return add_nodes(first, last, color_function, DefaultPosition(), node_map);
   }
 
   /** Add the nodes in the range [first, last) to the display.

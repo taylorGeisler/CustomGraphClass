@@ -6,13 +6,14 @@
 # Executables to build
 #EXEC += viewer
 #EXEC += subgraph
-#EXEC += shortest_path
+EXEC += shortest_path
 EXEC += mass_spring
 EXEC += test_nodes
 EXEC += test_edges
 EXEC += mtl_test
 EXEC += poisson
 EXEC += taylor
+EXEC += exercise2
 
 # Get the shell name to determine the OS
 UNAME := $(shell uname)
@@ -37,6 +38,7 @@ DEPSFLAGS = -MD -MF $(DEPSFILE) -MP
 #   To include directories use -Ipath/to/files
 INCLUDES += -I.
 INCLUDES += -I/home/taylor/Documents/cme212/SourceCode/MTL-4.0.9555-Linux/usr/include
+INCLUDES += -I/home/taylor/Documents/cme212/SourceCode/thrust
 
 # Define CXX compile flags
 CXXFLAGS += -std=c++11 -O3 -funroll-loops -W -Wall -Wextra #-Wfatal-errors

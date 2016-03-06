@@ -236,6 +236,8 @@ int main(int argc, char** argv)
     std::cerr << "Usage: " << argv[0] << " NODES_FILE TETS_FILE\n";
     exit(1);
   }
+  
+  Point a;
 
   // Define an empty Graph
   GraphType graph;

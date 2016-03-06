@@ -53,7 +53,7 @@ struct MyComparator {
  * the root node. The root's value() is 0. Nodes unreachable from
  * the root have value() -1.
  */
-int shortest_path_lengths(Graph<int>& g, const Point& point) {
+int shortest_path_lengths(Graph<int,int>& g, const Point& point) {
 
   // Calculate root node
   int init_val = -1; // Initialize values to large number
