@@ -58,10 +58,10 @@ int shortest_path_lengths(Graph<int,int>& g, const Point& point) {
   // Calculate root node
   int init_val = -1; // Initialize values to large number
   float closest_dist = std::numeric_limits<float>::max();
-  Graph<int>::size_type root;
+  Graph<int,int>::size_type root;
   for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
 	  float dist = norm((*ni).position()-point);
-	  Graph<int>::size_type node_index = (*ni).index();
+	  Graph<int,int>::size_type node_index = (*ni).index();
 	  g.node(node_index).value() = init_val;
 	  if (dist < closest_dist) {
 		  root = (*ni).index();
@@ -72,14 +72,14 @@ int shortest_path_lengths(Graph<int,int>& g, const Point& point) {
   std::cout<< root <<std::endl;
 
   // Breadth-First Search
-  std::vector<Graph<int>::size_type> parent (g.size(),g.size());
+  std::vector<Graph<int,int>::size_type> parent (g.size(),g.size());
   
-  std::queue<Graph<int>::size_type> Q;
+  std::queue<Graph<int,int>::size_type> Q;
   g.node(root).value() = 0;
   Q.push(root);
   
   while (!(Q.empty())) {
-	  Graph<int>::size_type current = Q.front();
+	  Graph<int,int>::size_type current = Q.front();
 	  Q.pop();
 	  
 	  for (auto eit = g.node(current).edge_begin(); !(eit == g.node(current).edge_end()); ++eit ) {
@@ -93,7 +93,7 @@ int shortest_path_lengths(Graph<int,int>& g, const Point& point) {
   // Calculate longest path
   int longest_path = 0;
   for (auto ni = g.node_begin(); ni != g.node_end(); ++ni) {
-	  Graph<int>::node_type ni_node = *ni;
+	  Graph<int,int>::node_type ni_node = *ni;
 	  if (ni_node.value() > longest_path) {
 		  longest_path = ni_node.value();
 	  }
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
   }
 
   // Construct a Graph
-  typedef Graph<int> GraphType;
+  typedef Graph<int,int> GraphType;
   GraphType graph;
   std::vector<GraphType::node_type> nodes;
 
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
   std::cout << longest_path << std::endl;
   // Construct a Color functor and view with the SDLViewer
   auto node_map = viewer.empty_node_map(graph);
-  viewer.add_nodes(graph.node_begin(), graph.node_end(), [longest_path](Graph<int>::node_type n){ float c = (float)n.value()/(float)(longest_path+1);
+  viewer.add_nodes(graph.node_begin(), graph.node_end(), [longest_path](Graph<int,int>::node_type n){ float c = (float)n.value()/(float)(longest_path+1);
 	  if (c < 0.0) {c = 0.0;};return CME212::Color::make_heat(-(c-1));}, node_map);
 	  
   viewer.add_edges(graph.edge_begin(), graph.edge_end(), node_map);

@@ -126,7 +126,7 @@ double symp_euler_step(G& g, double t, double dt, F force) {
         n.position() += n.value().vel * dt;
 	}
   }
-  CombinedConstraint<con_wall,con_sphere_rem> ZZZ = make_combined_constraint(con_wall(), con_sphere_rem());
+  CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
   ZZZ(g, t);
   
   // Compute the t+dt velocity
