@@ -17,6 +17,8 @@
 
 #include "Graph.hpp"
 
+#include <thrust/iterator/transform_iterator.h>
+#include <functional>
 
 
 // Gravity in meters/sec^2

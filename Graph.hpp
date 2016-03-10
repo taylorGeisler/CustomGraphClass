@@ -29,6 +29,8 @@ class Graph {
   // later in the Graph's definition.
   /** Type of the nodes uid. */
   typedef unsigned uid_type;
+  
+  typedef unsigned index_type;
 
  public:
 
@@ -562,97 +564,97 @@ class Graph {
 
   /** @class Graph::NodeIterator
    * @brief Iterator class for nodes. A forward iterator. */
-  class NodeIterator : private totally_ordered<NodeIterator> {
-   public:
-    // These type definitions help us use STL's iterator_traits.
-    /** Element type. */
-    typedef Node value_type;
-    /** Type of pointers to elements. */
-    typedef Node* pointer;
-    /** Type of references to elements. */
-    typedef Node& reference;
-    /** Iterator category. */
-    typedef std::input_iterator_tag iterator_category;
-    /** Difference between iterators */
-    typedef std::ptrdiff_t difference_type;
+  //class NodeIterator : private totally_ordered<NodeIterator> {
+   //public:
+    //// These type definitions help us use STL's iterator_traits.
+    ///** Element type. */
+    //typedef Node value_type;
+    ///** Type of pointers to elements. */
+    //typedef Node* pointer;
+    ///** Type of references to elements. */
+    //typedef Node& reference;
+    ///** Iterator category. */
+    //typedef std::input_iterator_tag iterator_category;
+    ///** Difference between iterators */
+    //typedef std::ptrdiff_t difference_type;
 
-    /** Construct an invalid NodeIterator. */
-    NodeIterator() {
-    }
+    ///** Construct an invalid NodeIterator. */
+    //NodeIterator() {
+    //}
 
-    // HW1 #2: YOUR CODE HERE
-    // Supply definitions AND SPECIFICATIONS for:
-    // Node operator*() const
-    // NodeIterator& operator++()
-    // bool operator==(const NodeIterator&) const
+    //// HW1 #2: YOUR CODE HERE
+    //// Supply definitions AND SPECIFICATIONS for:
+    //// Node operator*() const
+    //// NodeIterator& operator++()
+    //// bool operator==(const NodeIterator&) const
 
-    /** Derefence the NodeIterator to return the Node it corresponds to.
-     * @pre @a this != node_end().
-     *
-     * Complexity: O(1).
-     */
-    Node operator*() const {
-      return graph_->node(i_);
-    }
+    ///** Derefence the NodeIterator to return the Node it corresponds to.
+     //* @pre @a this != node_end().
+     //*
+     //* Complexity: O(1).
+     //*/
+    //Node operator*() const {
+      //return graph_->node(i_);
+    //}
 
-    /** Increment the iterator.
-     * @pre @a this != node_end().
-     * @post If result_iterator != node_end(),
-     *       *old_iterator.index() + 1 == *result_iterator.index()
-     *
-     * Complexity: O(1).
-     */
-    NodeIterator& operator++() {
-      ++ i_;
-      return *this;
-    }
+    ///** Increment the iterator.
+     //* @pre @a this != node_end().
+     //* @post If result_iterator != node_end(),
+     //*       *old_iterator.index() + 1 == *result_iterator.index()
+     //*
+     //* Complexity: O(1).
+     //*/
+    //NodeIterator& operator++() {
+      //++ i_;
+      //return *this;
+    //}
 
-    /** Test whether this iterator and @a ni are equal.
-     * Two iterators that are not node_end() are equal if and only if
-     * the nodes they point to are equal : 
-     *   it1 == it2 <=> *it1 == *it2
-     *
-     * Complexity: O(1).
-     */
-    bool operator==(const NodeIterator& ni) const {
-      if(graph_ == ni.graph_)
-        return (i_ == ni.i_);
-      else
-        return false;
-    }
+    ///** Test whether this iterator and @a ni are equal.
+     //* Two iterators that are not node_end() are equal if and only if
+     //* the nodes they point to are equal : 
+     //*   it1 == it2 <=> *it1 == *it2
+     //*
+     //* Complexity: O(1).
+     //*/
+    //bool operator==(const NodeIterator& ni) const {
+      //if(graph_ == ni.graph_)
+        //return (i_ == ni.i_);
+      //else
+        //return false;
+    //}
 
 
-   private:
-    friend class Graph;
-    // HW1 #2: YOUR CODE HERE
+   //private:
+    //friend class Graph;
+    //// HW1 #2: YOUR CODE HERE
 
-    /* A pointer to the graph whose nodes it iterates through. */
-    Graph* graph_;
-    /* Index of the node this iterator represents. */
-    size_type i_;
+    ///* A pointer to the graph whose nodes it iterates through. */
+    //Graph* graph_;
+    ///* Index of the node this iterator represents. */
+    //size_type i_;
 
-    /* A valid constructor for the Graph class. */
-    NodeIterator(const Graph* graph, size_type i)
-      : graph_(const_cast<Graph*>(graph)), i_(i) {
-    }
+    ///* A valid constructor for the Graph class. */
+    //NodeIterator(const Graph* graph, size_type i)
+      //: graph_(const_cast<Graph*>(graph)), i_(i) {
+    //}
 
-  };
+  //};
   
   struct node_of_uid : public std::unary_function<uid_type,Node>
   {
-       node_of_uid(Graph* g) : g_(g) {
-	   }
+	 public:
+       node_of_uid(Graph* g) : g_(g) {}
        Node operator()(uid_type uid) { return Node(g_, uid); }
      private:
        Graph* g_ = NULL; 
-  };
+  };  
   
-  struct NodeIterator2 : thrust::transform_iterator<node_of_uid,std::vector<uid_type>, Node> {
+  struct NodeIterator : thrust::transform_iterator<node_of_uid,std::vector<uid_type>::const_iterator, Node> {
       // Import super class's constructors
-      using NodeIterator2::transform_iterator::transform_iterator;
+      using NodeIterator::transform_iterator::transform_iterator;
 	  
-	  NodeIterator2(const graph_type* g, uid_type uid)
-	    :  NodeIterator::transform_iterator(uid, node_of_uid(g))
+	  NodeIterator(const Graph* graph, index_type idx)
+	    :  NodeIterator::transform_iterator((graph->idx2uid_).begin() + idx, node_of_uid(const_cast<Graph*>(graph)))
 	    {}  
   };
   
