@@ -18,12 +18,13 @@ EXEC += space_search_test
 UNAME := $(shell uname)
 
 # Define the C++ compiler to use
-ifeq ($(UNAME), Linux)
-  CXX := clang++-3.5
-endif
-ifeq ($(UNAME), Darwin)
-  CXX := clang++
-endif
+#ifeq ($(UNAME), Linux)
+#  CXX := clang++-3.5
+#endif
+#ifeq ($(UNAME), Darwin)
+#  CXX := clang++
+#endif
+CXX := g++ -fopenmp
 
 # Dependency directory and flags
 DEPSDIR := $(shell mkdir -p .deps; echo .deps)
@@ -41,6 +42,7 @@ INCLUDES += -I/home/taylor/Documents/cme212/SourceCode/thrust
 
 # Define CXX compile flags
 CXXFLAGS += -std=c++11 -O3 -funroll-loops -W -Wall -Wextra #-Wfatal-errors
+CXXFLAGS += -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP
 
 # Define any directories containing libraries
 #   To include directories use -Lpath/to/files
