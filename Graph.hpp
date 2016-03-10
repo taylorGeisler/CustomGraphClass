@@ -12,6 +12,8 @@
 #include "CME212/Util.hpp"
 #include "CME212/Point.hpp"
 
+#include <thrust/iterator/transform_iterator.h>
+#include <functional>
 
 /** @class Graph
  * @brief A template for 3D undirected graphs.
@@ -635,7 +637,25 @@ class Graph {
     }
 
   };
-
+  
+  struct node_of_uid : public std::unary_function<uid_type,Node>
+  {
+       node_of_uid(Graph* g) : g_(g) {
+	   }
+       Node operator()(uid_type uid) { return Node(g_, uid); }
+     private:
+       Graph* g_ = NULL; 
+  };
+  
+  struct NodeIterator2 : thrust::transform_iterator<node_of_uid,std::vector<uid_type>, Node> {
+      // Import super class's constructors
+      using NodeIterator2::transform_iterator::transform_iterator;
+	  
+	  NodeIterator2(const graph_type* g, uid_type uid)
+	    :  NodeIterator::transform_iterator(uid, node_of_uid(g))
+	    {}  
+  };
+  
   // HW1 #2: YOUR CODE HERE
   // Supply definitions AND SPECIFICATIONS for:
   // node_iterator node_begin() const

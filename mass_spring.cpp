@@ -205,6 +205,10 @@ struct DampingForce {
   /** Return the damping force applying to @a n at time @a t.
    *
    */
+  DampingForce(double c) : c_(c) {
+  }
+  DampingForce() {
+  }
   template <typename NODE>
   Point operator()(NODE n, double t) {
 		//Damping force
@@ -212,7 +216,7 @@ struct DampingForce {
 		(void)t;
 	}
 	
-    double c_ = 1/100;
+    double c_;
 };
 
 
@@ -255,7 +259,7 @@ int main(int argc, char** argv) {
   }
   
   for (auto eit = graph.edge_begin(); eit != graph.edge_end(); ++eit) {
-	  (*eit).value().K = 100;
+	  (*eit).value().K = 100.0;
 	  (*eit).value().L_init = (*eit).length();
   }
 
@@ -273,7 +277,7 @@ int main(int argc, char** argv) {
   viewer.center_view();
 
   // Begin the mass-spring simulation
-  double dt = 0.001;
+  double dt = 1.0/double(graph.size());
   double t_start = 0;
   double t_end = 5.0;
 
@@ -281,7 +285,7 @@ int main(int argc, char** argv) {
     //std::cout << "t = " << t << std::endl;
     //damp_force.c = 1/graph.size();
     //symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce()));
-    symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce(),DampingForce()));
+    symp_euler_step(graph, t, dt, make_combined_force(GravityForce(),MassSpringForce(),DampingForce(1.0/double(graph.size()))));
     // Update viewer with nodes' new positions
     viewer.clear();
     node_map.clear();
