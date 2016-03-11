@@ -272,6 +272,8 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  CME212::Clock clock;
+
   // Construct an empty graph
   GraphType graph;
 
@@ -324,7 +326,7 @@ int main(int argc, char** argv) {
   // Begin the mass-spring simulation
   double dt = 1.0/double(graph.size());
   double t_start = 0;
-  double t_end = 5.0;
+  double t_end = 0.5;
 
   for (double t = t_start; t < t_end; t += dt) {
     //std::cout << "t = " << t << std::endl;
@@ -341,8 +343,10 @@ int main(int argc, char** argv) {
 
     // These lines slow down the animation for small graphs, like grid0_*.
     // Feel free to remove them or tweak the constants.
-    if (graph.size() < 100)
-      CME212::sleep(0.001);
+    //if (graph.size() < 100)
+    //  CME212::sleep(0.001);
   }
+  double time = clock.seconds();
+  std::cout << "Time: " << time << std::endl;
   return 0;
 }
