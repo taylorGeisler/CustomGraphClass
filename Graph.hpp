@@ -320,6 +320,28 @@ class Graph {
     size_type idx = remove_node(uid);
     return(NodeIterator(this, idx));
   }
+  
+  struct nodes {
+	  nodes(Graph* g) : g_(g) {} 
+	  NodeIterator begin() {
+		  return g_->node_begin();
+	  }
+	  NodeIterator end() {
+		  return g_->node_end();
+	  }
+	  Graph* g_;
+  };
+  
+  struct edges {
+	  edges(Node n) : n_(n) {} 
+	  IncidentIterator begin() {
+		  return n_.edge_begin();
+	  }
+	  IncidentIterator end() {
+		  return n_.edge_end();
+	  }
+	  Node n_;
+  };
 
 
 

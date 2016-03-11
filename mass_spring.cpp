@@ -87,6 +87,38 @@ struct con_sphere_rem {
 	  double radius = 0.15;
 };
 
+
+
+struct SelfCollisionConstraint {
+	void operator() (GraphType& g, double) const {
+	
+		struct enforce_collision_constraint {
+		  enforce_collision_constraint(GraphType& g) : g_(g) {}
+		  void operator () (Node n) {
+			  const Point& center = n.position();
+				
+		      double radius2 = std::numeric_limits<double>::max();
+			  for (Edge e : GraphType::edges(n))
+				  radius2 = std::min(radius2, normSq(e.node2().position() - center));
+			  radius2 *= 0.9;
+				
+			  for (Node n2 : GraphType::nodes(&g_)) {
+				Point r = center - n2.position();
+				double l2 = normSq(r);
+				if (n != n2 && l2 < radius2) {
+					//Remove our velocity component in r
+					n.value().vel -= (dot(r,n.value().vel) / l2) * r;
+				}
+			  }
+		  }
+		  GraphType& g_;
+	    };
+	    
+        thrust::for_each(thrust::omp::par,g.node_begin(), g.node_end(), enforce_collision_constraint(g));
+	}
+};
+
+
 template <typename C1, typename C2>
 struct CombinedConstraint {
 	C1 c1;
@@ -134,7 +166,7 @@ double symp_euler_step(G& g, double t, double dt, F force) {
   };
   thrust::for_each(thrust::omp::par,g.node_begin(), g.node_end(), update_position(dt));
   
-  CombinedConstraint<con_wall,con_sphere_rem> constraints = make_combined_constraint(con_wall(), con_sphere_rem());
+  CombinedConstraint<con_wall,SelfCollisionConstraint> constraints = make_combined_constraint(con_wall(), SelfCollisionConstraint());
   constraints(g, t);
   
   struct update_velocity {
@@ -152,8 +184,6 @@ double symp_euler_step(G& g, double t, double dt, F force) {
   
   return t + dt;
 }
-
-
 
 template <typename F1, typename F2>
 struct CombinedForce {

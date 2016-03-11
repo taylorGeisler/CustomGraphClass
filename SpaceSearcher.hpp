@@ -140,7 +140,7 @@ class SpaceSearcher
     ZipIterator zip_last(thrust::make_tuple(tlast, plast));
     
     struct make_mp_2 {
-		make_mp(MortonCoderType* mc_in) : mcp_(mc_in){
+		make_mp_2(MortonCoderType* mc_in) : mcp_(mc_in){
 		}
 		morton_pair operator() (IteratorTuple it_t) {
 			Point p = thrust::get<1>(it_t);
