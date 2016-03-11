@@ -128,7 +128,7 @@ class SpaceSearcher
   template <typename TIter, typename PointIter>
   SpaceSearcher(const Box3D& bb,
                 TIter tfirst, TIter tlast,
-                PointIter pfirst, PointIter plast) {
+                PointIter pfirst, PointIter plast) : mc_(bb) {
     // HW4: YOUR CODE HERE
     
     // typedef a tuple of these iterators
@@ -139,8 +139,8 @@ class SpaceSearcher
     ZipIterator zip_first(thrust::make_tuple(tfirst, pfirst));
     ZipIterator zip_last(thrust::make_tuple(tlast, plast));
     
-    struct make_mp {
-		make_mp(MortonCoderType mc_in) : mc_(mc_in){
+    struct make_mp_2 {
+		make_mp(MortonCoderType* mc_in) : mcp_(mc_in){
 		}
 		morton_pair operator() (IteratorTuple it_t) {
 			Point p = thrust::get<1>(it_t);
@@ -149,11 +149,12 @@ class SpaceSearcher
 			tt_type t(ct,val);
 			return morton_pair(t);
 		}
-		MortonCoderType mc_;
+		MortonCoderType* mcp_;
 	};
 	z_data_ = std::vector<morton_pair>(
-	thrust::make_transform_iterator(zip_first, make_mp(mc)),
-	thrust::make_transform_iterator(zip_last, make_mp(mc)));
+	thrust::make_transform_iterator(zip_first, make_mp_2(&mc_)),
+	thrust::make_transform_iterator(zip_last, make_mp_2(&mc_)));
+	sort(z_data_.begin(), z_data_.end());
   }
 
   ///////////////
