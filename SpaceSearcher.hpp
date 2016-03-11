@@ -81,6 +81,8 @@ class SpaceSearcher
   SpaceSearcher(const Box3D& bb,
                 TIter first, TIter last, T2Point t2p) {
     // HW4: YOUR CODE HERE
+    
+    
   }
 
   /** @brief SpaceSearcher Constructor.

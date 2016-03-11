@@ -14,11 +14,14 @@
 #include "CME212/Util.hpp"
 #include "CME212/Color.hpp"
 #include "CME212/Point.hpp"
+#include "MortonCoder.hpp"
 
 #include "Graph.hpp"
 
 #include <thrust/iterator/transform_iterator.h>
 #include <functional>
+#include <thrust/for_each.h>
+#include <thrust/execution_policy.h>
 
 
 // Gravity in meters/sec^2
@@ -35,8 +38,6 @@ struct EdgeData {
 	double K;
 };
 
-// HW2 #1 YOUR CODE HERE
-// Define your Graph type
 typedef Graph<NodeData,EdgeData> GraphType;
 typedef typename GraphType::node_type Node;
 typedef typename GraphType::edge_type Edge;
@@ -119,24 +120,35 @@ CombinedConstraint<C1,C2> make_combined_constraint(C1 constraint1, C2 constraint
  */
 template <typename G, typename F>
 double symp_euler_step(G& g, double t, double dt, F force) {
-  // Compute the t+dt position
-  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
-    auto n = *it;
-    if (n.position() != Point(0,0,0) and n.position() != Point(1,0,0)) {	
-        // Update the position of the node according to its velocity
-        // x^{n+1} = x^{n} + v^{n} * dt
-        n.position() += n.value().vel * dt;
-	}
-  }
-  CombinedConstraint<con_wall,con_sphere> ZZZ = make_combined_constraint(con_wall(), con_sphere());
-  ZZZ(g, t);
   
-  // Compute the t+dt velocity
-  for (auto it = g.node_begin(); it != g.node_end(); ++it) {
-    auto n = *it;
-    // v^{n+1} = v^{n} + F(x^{n+1},t) * dt / m
-    n.value().vel += force(n, t) * (dt / n.value().mass);
-  }
+  struct update_position {
+	  update_position(double dt) : dt_(dt) {}
+	  void operator () (Node n) {
+		  if (n.position() != Point(0,0,0) and n.position() != Point(1,0,0)) {
+			  // x^{n+1} = x^{n} + v^{n} * dt
+			  n.position() += n.value().vel * dt_;
+		  }
+	  }
+	  double dt_;
+  };
+  thrust::for_each(thrust::omp::par,g.node_begin(), g.node_end(), update_position(dt));
+  
+  CombinedConstraint<con_wall,con_sphere_rem> constraints = make_combined_constraint(con_wall(), con_sphere_rem());
+  constraints(g, t);
+  
+  struct update_velocity {
+	  update_velocity(double t, double dt, F force) : t_(dt), dt_(t), force_(force) {}
+	  void operator () (Node n) {
+		  // v^{n+1} = v^{n} + F(x^{n+1},t) * dt / m
+          n.value().vel += force_(n, t_) * (dt_ / n.value().mass);
+	  }
+	  double t_;
+	  double dt_;
+	  F force_;
+  };
+  
+  thrust::for_each(thrust::omp::par,g.node_begin(), g.node_end(), update_velocity(dt, t, force));
+  
   return t + dt;
 }
 
