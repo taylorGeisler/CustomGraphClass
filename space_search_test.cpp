@@ -8,6 +8,8 @@
 #include "Graph.hpp"
 #include "SpaceSearcher.hpp"
 
+#include <bitset>
+
 int main()
 {
   // Construct an empty graph

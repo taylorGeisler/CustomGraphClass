@@ -23,6 +23,7 @@
 #include <thrust/for_each.h>
 #include <thrust/execution_policy.h>
 
+#include <SpaceSearcher.hpp>
 
 // Gravity in meters/sec^2
 static constexpr double grav = 9.81;

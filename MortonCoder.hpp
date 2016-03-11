@@ -26,12 +26,11 @@ inline uint32_t spread_bits(uint32_t x) {
   unsigned int j;
   unsigned int k;
   unsigned int n = 1;
-  unsigned int b;
   for (unsigned int i = 0; i < 10; ++i) {
 	  j = 9-i;
 	  k = j*3;
-	  unsigned int tmp = ((b >> j) ^ (b >> k)) & ((1U << n) - 1);
-	  x = b ^ ((tmp << j) | (tmp << k));
+	  unsigned int tmp = ((x >> j) ^ (x >> k)) & ((1U << n) - 1);
+	  x = x ^ ((tmp << j) | (tmp << k));
   }
   return x;
 }
@@ -47,12 +46,11 @@ inline uint32_t compact_bits(uint32_t x) {
   unsigned int j;
   unsigned int k;
   unsigned int n = 1;
-  unsigned int b;
-  for (unsigned int i = 0; i < 10; ++i) {
-	  j = 9-i;
+  for (unsigned int i = 1; i < 10; ++i) {
+	  j = i;
 	  k = j*3;
-	  unsigned int tmp = ((b >> j) ^ (b >> k)) & ((1U << n) - 1);
-	  x = b ^ ((tmp << j) | (tmp << k));
+	  unsigned int tmp = ((x >> j) ^ (x >> k)) & ((1U << n) - 1);
+	  x = x ^ ((tmp << j) | (tmp << k));
   }
   for (unsigned int i = 10; i < 32; ++i) {
 	  x &= ~(1 << i);
