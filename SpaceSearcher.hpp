@@ -9,6 +9,8 @@
 #include "MortonCoder.hpp"
 #include <thrust/tuple.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/sort.h>
+#include <thrust/execution_policy.h>
 
 /** @class SpaceSearcher
  * @brief Class for making spatial searches, which uses the MortonCoder
@@ -102,7 +104,7 @@ class SpaceSearcher
 	z_data_ = std::vector<morton_pair>(
 	thrust::make_transform_iterator(first, make_mp(&mc_, t2p)),
 	thrust::make_transform_iterator(last, make_mp(&mc_, t2p)));
-    sort(z_data_.begin(), z_data_.end());
+    thrust::sort(thrust::omp::par, z_data_.begin(), z_data_.end());
   }
 
   /** @brief SpaceSearcher Constructor.
@@ -154,7 +156,7 @@ class SpaceSearcher
 	z_data_ = std::vector<morton_pair>(
 	thrust::make_transform_iterator(zip_first, make_mp_2(&mc_)),
 	thrust::make_transform_iterator(zip_last, make_mp_2(&mc_)));
-	sort(z_data_.begin(), z_data_.end());
+	thrust::sort(thrust::omp::par, z_data_.begin(), z_data_.end());
   }
 
   ///////////////
